@@ -1,0 +1,192 @@
+'/*****************************************************************************
+'*       Author JWilcock 2014
+'*      v1.0
+'*****************************************************************************
+
+Declare Function GE_OpenGrid lib "migrid.dll" 
+	(filein As string, byval cache as integer, hgrid as integer) As logical
+
+Declare Function GE_GetCoordSysInfo lib "migrid.dll"
+	(ByVal hgrid as integer, clau as string, mix as float, miy as float, max as float, may as float) as logical
+
+Declare Function GE_GetContinuousMinMax lib "migrid.dll"
+	(ByVal hgrid as integer, zmin as float, zmax as float) as logical
+
+Declare Function GE_GetDimensions lib "migrid.dll"
+	(ByVal hgrid as integer, wid as integer, hei as integer) as logical
+
+Declare Function GE_GetContinuousValue lib "migrid.dll"
+	(ByVal hgrid as integer,ByVal icol as integer,ByVal jrow as integer, zval as float, ax as smallint) as logical
+
+Declare Function GE_GetGridType lib "migrid.dll"
+	(ByVal hgrid as integer, gtyp as smallint) as logical
+
+Declare Function GE_StartRead lib "migrid.dll"
+	(ByVal hgrid as integer) as logical
+
+Declare Function GE_EndRead lib "migrid.dll"
+	(ByVal hgrid as integer) as logical
+	
+Declare Function GE_CloseGrid lib "migrid.dll" 
+  	(hgrid as integer) as logical
+
+
+'****************************************************************************
+' Include files and Define statements
+'****************************************************************************
+Include "C:\Program Files (x86)\MapInfo\MapBasic\MAPBASIC.DEF"
+Include "C:\Program Files (x86)\MapInfo\MAPBASIC\menu.def"  
+Include "C:\Program Files (x86)\MapInfo\MAPBASIC\icons.def" 
+Include "C:\Program Files (x86)\MapInfo\MAPBASIC\auto_lib.def" 
+'****************************************************************************
+
+
+'****************************************************************************
+' .NET Functions
+'****************************************************************************
+Declare Method GetResItemStr Class "MapInfoDataDrivenPages.Controller" Lib "MapInfoDataDrivenPages.dll" (ByVal itemName As String) As String
+Declare Method ShowDlg Class "MapInfoDataDrivenPages.Controller" Lib "MapInfoDataDrivenPages.dll" (ByVal hwnd as Integer) As Logical
+Declare Method CloseDlg Class "MapInfoDataDrivenPages.Controller" Lib "MapInfoDataDrivenPages.dll" () As Logical
+'Declare Method XsecLine Class "ProfileTool.Dlg" Lib "ProfileTool.dll" (ByVal ReturnString as string) As Logical
+
+'****************************************************************************
+' Declare sub procedures
+'****************************************************************************
+Declare Sub Main
+Declare Sub EndHandler 
+Declare Sub loader
+Declare Sub DDP
+
+
+' Handlers for dialog controls: 
+Declare Sub bye 
+
+declare function RegisterTool lib "tooltabl.dll" (
+	byval title as string,
+	byval description as string,
+	byval location as string,
+	byval owner as string,
+byval autoload as integer) as integer
+declare function UnregisterAllByOwner lib "tooltabl.dll" (byval owner as string) as integer
+
+'****************************************************************************
+' Declare global variables. 
+'****************************************************************************
+Global window_id As Integer   ' Window ID of current (map) window 
+Global PI as float 
+
+
+
+   
+Sub Main
+	PI = 3.14159265359
+	
+  OnError Goto HandleError
+  ' Assign some global variables, so that the Auto-Load button 
+  ' (in the About dialog) can use the library routines 
+  ' stored in AUTO_LIB.MBO.  
+  gsAppFilename = GetResItemStr("STR_MB_APP_FILENAME")    ' name of MapBasic app file  
+  gsAppDescription = GetResItemStr("STR_MB_APP_DESC")      ' short description of MB application 
+
+'check if file exists 
+if FileExists(GetFolderPath$(-3) + "\" + "DDP.tab") then
+	'do nothing
+else
+
+
+	dim regTool as integer
+	dim thePath as string  
+	thePath = ApplicationDirectory$( ) + "MapInfoDataDrivenPages.mbx"
+	'regTool = RegisterTool("ProfileTool", "Get Elevation profiles",thePath,"JWilcock",1)
+end if
+
+
+ call loader
+     'Show 
+
+'add menu to tools
+	Create Menu "MapInfoDataDrivenPages" as
+		"Show &Tool" Calling loader,
+		"(-",
+		'"&About" calling ShowAbout,
+		"E&xit" calling bye
+
+  	Alter Menu "Tools" Add "MapInfoDataDrivenPages" As "MapInfoDataDrivenPages"
+
+
+	
+  Exit Sub
+  HandleError:
+    Note "Main: " + Error$()
+    Resume Next
+End Sub
+
+'****************************************************************************
+' 
+'
+' 
+' 
+'****************************************************************************
+Sub loader 
+  OnError Goto HandleError
+  'If NumWindows() < 1 Then 
+  '  Note GetResItemStr("ERR_NO_WIN_OPEN") 
+  '  Exit Sub 
+  'End If 
+
+  'window_id = FrontWindow()
+    
+ ' If WindowInfo(window_id, WIN_INFO_TYPE ) <> WIN_MAPPER Then 
+  '  Note GetResItemStr("ERR_FRONT_WIN_NOT_MAPPER") 
+  '  Exit Sub 
+  'End If  
+   
+  ' Display a dialog 
+ 
+  Dim ret As Logical
+  Dim hwndPro as Integer
+  hwndPro = SystemInfo(SYS_INFO_MAPINFOWND)
+  ret = ShowDlg(hwndPro)
+  If Not ret Then
+    Note GetResItemStr("ERR_MB_DLG_NOT_DISPLAYED")
+  End If
+  Exit Sub
+  HandleError:
+    Note "ProfileTool: " + Error$()
+    Resume Next
+End Sub
+
+
+
+'*****************************************************************
+' If user chooses Close menu item, shut down. 
+Sub bye 
+  OnError Goto HandleError
+  End Program
+  HandleError:
+    Note "bye: " + Error$()
+    Resume Next 
+End Sub 
+
+Sub  EndHandler
+  OnError Goto HandleError
+  Dim ret as Logical
+  ret = CloseDlg()
+  Exit Sub
+  HandleError:
+    Note "EndHandler: " + Error$()
+    Resume Next
+end sub
+
+
+' ////////////////////// end 
+
+sub DDP
+
+
+
+end sub
+
+ 
+
+
