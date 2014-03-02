@@ -56,6 +56,8 @@ Declare Sub Main
 Declare Sub EndHandler 
 Declare Sub loader
 Declare Sub DDP
+Declare Sub saveDDPWorkspace
+Declare Sub SelChangedHandler 
 
 
 ' Handlers for dialog controls: 
@@ -74,7 +76,7 @@ declare function UnregisterAllByOwner lib "tooltabl.dll" (byval owner as string)
 '****************************************************************************
 Global window_id As Integer   ' Window ID of current (map) window 
 Global PI as float 
-
+'Global tempString as string 'used in .net
 
 
    
@@ -187,6 +189,15 @@ sub DDP
 
 end sub
 
+sub saveDDPWorkspace()
+	'call the .net sub (saveWORKSPACE)
+	
+End Sub
  
+'dont need to check for deletion as table does not pack untill workspace saves 
+Sub SelChangedHandler
+ 	
+	'print CommandInfo( CMD_INFO_ROWID)
+End Sub 
 
 

@@ -26,10 +26,10 @@ Namespace MapInfoDataDrivenPages
         'Private Const STR_NAME As String = "Name"
         Private Const STR_ROOT As String = "root"
         Private Const STR_DIALOG As String = "Dialog"
-        Private Const STR_NAMEDVIEWS As String = "ProfileTool"
+        Private Const STR_NAMEDVIEWS As String = "DDP"
         'Private Const STR_VIEWS As String = "Views"
-        Private Const STR_PATH_DIALOG As String = "/ProfileTool/Dialog"
-        Private Const STR_PATH_ROOT_FOLDER As String = "/ProfileTool/Views"
+        Private Const STR_PATH_DIALOG As String = "/DDP/Dialog"
+        Private Const STR_PATH_ROOT_FOLDER As String = "/DDP/Views"
         Private Const STR_LEFT As String = "Left"
         Private Const STR_TOP As String = "Top"
         Private Const STR_WIDTH As String = "Width"
@@ -45,7 +45,7 @@ Namespace MapInfoDataDrivenPages
         ' 
 
         ' Name of the mutex 
-        Private sXMLFile As String = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\MapInfo\MapInfo\nviews.xml"
+        Private sXMLFile As String = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\MapInfo\MapInfo\DDP.xml"
         Private dialogLeft As Integer, dialogTop As Integer, dialogWidth As Integer, dialogHeight As Integer
         ' flag indicating whether it is the first time the form is being loaded
         Dim firstLoad As Boolean = True
@@ -66,12 +66,18 @@ Namespace MapInfoDataDrivenPages
         Public MapperIDList As New List(Of String)
         Public LayoutList As New List(Of String)
         Public LayoutIDList As New List(Of String)
+        Public pageList As New List(Of String)
+
+        Public pageTextRowIdList As New List(Of String)
+        Public pageTextColumnHeaderList As New List(Of String)
 
         'lists for interval xy
         Public Shared xIntervalList As New List(Of Double)
         Public Shared yIntervalList As New List(Of Double)
         Public Shared zIntervalList As New List(Of Double)
         Public Shared ELEVarray As New List(Of Double)
+
+
 
 
 
@@ -196,6 +202,14 @@ Namespace MapInfoDataDrivenPages
             populateListofIndexLayers()
             resetMapperAndLayoutPickers()
             resetSetupFields()
+
+
+            'clear page text lists
+            pageTextRowIdList.Clear()
+            pageTextColumnHeaderList.Clear()
+            pageList.Clear()
+            ToolStripDropDownButton1.DropDownItems.Clear()
+            ToolStripComboBox1.Items.Clear()
         End Sub
 
         Sub resetSetupFields()
@@ -317,8 +331,32 @@ Namespace MapInfoDataDrivenPages
 
         End Sub
 
-        Sub addPageText()
-            MsgBox("placeholder")
+        Sub addPageText(ByVal sender As System.Object, ByVal e As System.EventArgs)
+            'find out the text of the item clicked (this will be the column name) 
+            Dim column As String = CType(sender, ToolStripMenuItem).Text
+
+            'get the row number of the curent DDP - put as 1 untill implemented
+            Dim row As String = ToolStripComboBox1.SelectedIndex + 1
+
+            'get the contents of the above column and row for the index layer
+            InteropServices.MapInfoApplication.Do("Fetch rec " & row & " From " & ComboBox1.Text)
+
+            'get the next layout row id
+            Dim layoutID As String = LayoutIDList(ComboBox2.SelectedIndex)
+            Dim LayoutN As String = InteropServices.MapInfoApplication.Eval("WindowInfo(" & layoutID & ", 10 )")
+            Dim currentLayoutRow As Integer = getNextLayoutRow(LayoutN)
+
+            'create a text element in selected layout with the contents set to the above
+            InteropServices.MapInfoApplication.Do("Set CoordSys Layout Units " & Chr(34) & "mm" & Chr(34))
+            Dim tempString As String = Chr(34) & InteropServices.MapInfoApplication.Eval(ComboBox1.Text & "." & column) & Chr(34)
+            InteropServices.MapInfoApplication.Do("Create Text into Window " & layoutID & " " & tempString & " ( 10, 10 ) ( 20, 10 ) ")
+
+            'add to varibles
+            pageTextRowIdList.Add(currentLayoutRow)
+            pageTextColumnHeaderList.Add(column)
+
+            'check for xml file and add it.
+
         End Sub
 
         Sub getColumnsOfChosenTable(ByVal tableName As String)
@@ -349,6 +387,14 @@ Namespace MapInfoDataDrivenPages
             Return fail
         End Function
 
+        Sub setupRecordNumbers(ByVal tableNameOrID As String)
+            'populate page numbers
+            Dim numRec As String = numberOfRecords(tableNameOrID)
+            Label10.Text = numRec & " Features"
+
+            ToolStripComboBox1.Items.AddRange(pageList.ToArray)
+
+        End Sub
 
         Function numberOfRecords(ByVal tableName As String) As Integer
             'fetch only understands tablename
@@ -359,6 +405,7 @@ Namespace MapInfoDataDrivenPages
             While InteropServices.MapInfoApplication.Eval("EOT(" & tableName & ")") = "F"
                 If InteropServices.MapInfoApplication.Eval("objectinfo(" & tableName & ".obj, 11)") = "T" Then i = i + 1 '11=OBJ_INFO_NONEMPTY   |||  MI only returns strings
                 InteropServices.MapInfoApplication.Do("Fetch Next From " & tableName)
+                pageList.Add(i)
             End While
 
             Return i
@@ -383,8 +430,14 @@ Namespace MapInfoDataDrivenPages
         End Sub
 
         Private Sub ComboBox1_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ComboBox1.SelectedIndexChanged
+            'check if tale is packed - if not insist it must be to continue
+            'do this by checking total rows against rows with object data
+            'TODO:see above
+
             populateListofColumnsFromLayer(ComboBox1.Text)
             resetColumnSetupFields()
+            setupRecordNumbers(ComboBox1.Text)
+            ToolStripComboBox1.SelectedIndex = 0
         End Sub
 
 
@@ -405,8 +458,8 @@ Namespace MapInfoDataDrivenPages
             'set up MI dim for MBR object (.net cannot accept this
             InteropServices.MapInfoApplication.Do("dim currentObject as object")
 
-            'for MBR 
-            Dim minX, maxX, minY, maxY As Double
+            'set first page
+            ToolStripComboBox1.SelectedIndex = 0
 
             'get selected index table
             Dim tableName As String = ComboBox1.Text
@@ -419,9 +472,6 @@ Namespace MapInfoDataDrivenPages
             Dim Units As String = InteropServices.MapInfoApplication.Eval("MapperInfo(" & mapperID & ", 11)")
             Dim LayoutUnits As String = InteropServices.MapInfoApplication.Eval("MapperInfo(" & mapperID & ", 11)")
             Dim existingMapperScale As Double = InteropServices.MapInfoApplication.Eval("MapperInfo(" & mapperID & ", 2)")
-
-            Dim ZoomOrScaleString As String = ""
-            Dim ZoomOrScale As Double
 
             'must set coordinate system based on map options - see profile tool
             'set coord system - based on mapper window. 
@@ -457,57 +507,31 @@ Namespace MapInfoDataDrivenPages
                 pageWidth = layoutPageSize.Height
             End If
 
-
+            Dim i As Integer = 1
             'for each feature
             'get feature MBR and zoom to it
             InteropServices.MapInfoApplication.Do("Fetch First From " & tableName)
             While InteropServices.MapInfoApplication.Eval("EOT(" & tableName & ")") = "F"
                 'check if valid object (not all rows may have an object attached to them
                 If InteropServices.MapInfoApplication.Eval("objectinfo(" & tableName & ".obj, 11)") = "T" Then
-                    InteropServices.MapInfoApplication.Do("currentObject = MBR(" & tableName & ".obj)")
 
-                    'initialise coord values
-                    minX = InteropServices.MapInfoApplication.Eval("ObjectGeography(" & tableName & ".obj, 1) ")
-                    maxX = InteropServices.MapInfoApplication.Eval("ObjectGeography(" & tableName & ".obj, 3) ")
-                    minY = InteropServices.MapInfoApplication.Eval("ObjectGeography(" & tableName & ".obj, 2) ")
-                    maxY = InteropServices.MapInfoApplication.Eval("ObjectGeography(" & tableName & ".obj, 4) ")
-
-                    If RadioButton1.Checked Then
-                        'if best fit scaling
-                        Select Case ComboBox6.Text
-                            Case "Percentage"
-                                ZoomOrScale = ((maxX - minX) / 100) * NumericUpDown2.Value
-                            Case "Map Units"
-                                ZoomOrScale = (maxX - minX) + (NumericUpDown2.Value * 2)
-                            Case "Page Units"
-
-                        End Select
-
-                        ZoomOrScaleString = " Zoom " & ZoomOrScale & " units " & Chr(34) & Units & Chr(34)
-
-
-                    Else
-                        'map set by set scale 
-                        If RadioButton2.Checked Then
-                            'static scale
-                            ZoomOrScaleString = " Scale 1 for " & existingMapperScale
-                        Else
-                            'dynamic scale based on attribute column
-                            ZoomOrScaleString = " Scale 1 for " & InteropServices.MapInfoApplication.Eval(tableName & "." & ComboBox9.Text)
-
-                        End If
+                    'move page number on 
+                    'this will trigger pagetext update
+                    If ToolStripComboBox1.SelectedIndex + 1 <> ToolStripComboBox1.Items.Count And i > 1 Then
+                        ToolStripComboBox1.SelectedIndex = ToolStripComboBox1.SelectedIndex + 1
                     End If
 
 
-                    'see: Changing the Current View of the Map 
-                    InteropServices.MapInfoApplication.Do("Set Map window " & mapperID & " Center(" & minX + ((maxX - minX) / 2) & ", " & minY + ((maxY - minY) / 2) & ") " & ZoomOrScaleString)
-
 
                 End If
-                InteropServices.MapInfoApplication.Do("Fetch Next From " & tableName)
+                'requires re-seting after updatePageText
+                InteropServices.MapInfoApplication.Do("Fetch Rec " & i & " From " & tableName)
+
 
                 'export chosen layout to image
                 exportJPG(layoutID, Path.Combine(TextBox1.Text, InteropServices.MapInfoApplication.Eval(tableName & "." & ComboBox3.Text)), pageWidth, pageHeight)
+                i = i + 1
+                InteropServices.MapInfoApplication.Do("Fetch Next From " & tableName)
             End While
 
 
@@ -517,6 +541,72 @@ Namespace MapInfoDataDrivenPages
 
         End Sub
 
+
+
+        Sub moveExtent()
+            'set up MI dim for MBR object (.net cannot accept this
+            InteropServices.MapInfoApplication.Do("dim currentObject as object")
+
+            'for MBR 
+            Dim minX, maxX, minY, maxY As Double
+
+            'get selected index table
+            Dim tableName As String = ComboBox1.Text
+            Dim mapperID As Integer = MapperIDList(ComboBox1.SelectedIndex)
+            'get selected layout name
+            Dim layoutName As String = ComboBox2.Text
+            Dim layoutID As Integer = LayoutIDList(ComboBox2.SelectedIndex)
+
+            'get  units of MAP
+            Dim Units As String = InteropServices.MapInfoApplication.Eval("MapperInfo(" & mapperID & ", 11)")
+            Dim LayoutUnits As String = InteropServices.MapInfoApplication.Eval("MapperInfo(" & mapperID & ", 11)")
+            Dim existingMapperScale As Double = InteropServices.MapInfoApplication.Eval("MapperInfo(" & mapperID & ", 2)")
+
+            Dim ZoomOrScaleString As String = ""
+            Dim ZoomOrScale As Double
+
+            'move page number on 
+            InteropServices.MapInfoApplication.Do("currentObject = MBR(" & tableName & ".obj)")
+
+            'initialise coord values
+            minX = InteropServices.MapInfoApplication.Eval("ObjectGeography(" & tableName & ".obj, 1) ")
+            maxX = InteropServices.MapInfoApplication.Eval("ObjectGeography(" & tableName & ".obj, 3) ")
+            minY = InteropServices.MapInfoApplication.Eval("ObjectGeography(" & tableName & ".obj, 2) ")
+            maxY = InteropServices.MapInfoApplication.Eval("ObjectGeography(" & tableName & ".obj, 4) ")
+
+            If RadioButton1.Checked Then
+                'if best fit scaling
+                Select Case ComboBox6.Text
+                    Case "Percentage"
+                        ZoomOrScale = ((maxX - minX) / 100) * NumericUpDown2.Value
+                    Case "Map Units"
+                        ZoomOrScale = (maxX - minX) + (NumericUpDown2.Value * 2)
+                    Case "Page Units"
+
+                End Select
+
+                ZoomOrScaleString = " Zoom " & ZoomOrScale & " units " & Chr(34) & Units & Chr(34)
+
+
+            Else
+                'map set by set scale 
+                If RadioButton2.Checked Then
+                    'static scale
+                    ZoomOrScaleString = " Scale 1 for " & existingMapperScale
+                Else
+                    'dynamic scale based on attribute column
+                    ZoomOrScaleString = " Scale 1 for " & InteropServices.MapInfoApplication.Eval(tableName & "." & ComboBox9.Text)
+
+                End If
+            End If
+
+
+            'see: Changing the Current View of the Map 
+            InteropServices.MapInfoApplication.Do("Set Map window " & mapperID & " Center(" & minX + ((maxX - minX) / 2) & ", " & minY + ((maxY - minY) / 2) & ") " & ZoomOrScaleString)
+
+
+
+        End Sub
 
 
         Sub exportJPG(ByVal theLayoutNum As Integer, ByVal outName As String, ByVal pageX As Double, ByVal pageY As Double)
@@ -552,6 +642,145 @@ Namespace MapInfoDataDrivenPages
 
         Private Sub ToolStripDropDownButton1_Click(sender As Object, e As EventArgs) Handles ToolStripDropDownButton1.Click
 
+        End Sub
+
+
+        'page text function
+
+        Sub changeSaveWorkspaceMenu()
+            'check if save workspace is disabled - if it is then DDP save is already there
+
+            'alter the save workspace menu item to also save the xml
+            InteropServices.MapInfoApplication.Do("Alter Menu " & Chr(34) & "File" & Chr(34) & " Add " & Chr(34) & "Save DDP Workspace" & Chr(34) & "  Calling saveDDPWorkspace")
+
+            'change the save workspace button
+
+
+        End Sub
+
+        Sub saveWORKSPACE()
+            'see if workspace is a DDP workspace (i.e. has an xml file)
+            'if so place flag in workspace text file
+
+            'autostart the tracking MBX when the workspace is loaded
+
+        End Sub
+
+        Function getNextLayoutRow(ByVal layoutName As String)
+            'fetch only understands name
+
+            Dim i As Integer = 0
+            InteropServices.MapInfoApplication.Do("Fetch First From " & layoutName)
+            While InteropServices.MapInfoApplication.Eval("EOT(" & layoutName & ")") = "F"
+                InteropServices.MapInfoApplication.Do("Fetch Next From " & layoutName)
+                i = i + 1
+            End While
+
+            Return i + 1
+        End Function
+
+        Sub updatePageText()
+
+            'exit if no page text
+            If pageTextColumnHeaderList.Count = 0 Then Exit Sub
+
+            Dim layoutID As String = LayoutIDList(ComboBox2.SelectedIndex)
+            Dim LayoutN As String = InteropServices.MapInfoApplication.Eval("WindowInfo(" & layoutID & ", 10 )")
+
+            'set up temp object for exchange
+            InteropServices.MapInfoApplication.Do("dim objectTemp as object")
+            InteropServices.MapInfoApplication.Do("dim newValueTemp as string")
+
+            'cycle through all rows pageTextRowIdList 
+            For i As Integer = 0 To pageTextRowIdList.Count - 1
+
+                'fetch correct row
+                InteropServices.MapInfoApplication.Do("Fetch Rec " & pageTextRowIdList(i) & " From " & LayoutN)
+
+                'put current text object into temp object variable
+                InteropServices.MapInfoApplication.Do("objectTemp = " & LayoutN & ".obj")
+
+                'fetch correct record from index table
+                InteropServices.MapInfoApplication.Do("Fetch Rec " & ToolStripComboBox1.Text & " From " & ComboBox1.Text)
+
+                InteropServices.MapInfoApplication.Do("newValueTemp = " & ComboBox1.Text & "." & pageTextColumnHeaderList(i))
+
+                'update the object with new values
+                InteropServices.MapInfoApplication.Do("alter object objectTemp info 3, newValueTemp")
+
+                'update the layout text with the new object
+                InteropServices.MapInfoApplication.Do("update " & LayoutN & " set obj = objectTemp Where Rowid = " & pageTextRowIdList(i))
+            Next
+
+        End Sub
+
+
+
+
+        Sub CreateXML()
+            'create xml to hold rowid,positions and contents of page text
+
+            'place data in xml based on "pageText" array - which contains the data column and assoicated layout rowid
+
+        End Sub
+
+        Sub loadXML()
+            'find the xml file and load its contents into "pageText"
+
+
+        End Sub
+
+
+
+
+
+        Private Sub ToolStripComboBox1_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ToolStripComboBox1.SelectedIndexChanged
+            updatePageTextToSelectedNumber()
+        End Sub
+
+        Sub updatePageTextToSelectedNumber()
+            If ToolStripComboBox1.Text <> "" And ComboBox2.Text <> "" Then
+                InteropServices.MapInfoApplication.Do("Fetch Rec " & ToolStripComboBox1.Text & " From " & ComboBox1.Text)
+
+                'get selected index table
+                Dim tableName As String = ComboBox1.Text
+                Dim mapperID As Integer = MapperIDList(ComboBox1.SelectedIndex)
+
+                'must set coordinate system based on map options - see profile tool
+                'set coord system - based on mapper window. 
+                InteropServices.MapInfoApplication.Do("Dim coord As String")
+                InteropServices.MapInfoApplication.Do("coord = " & Chr(34) & "Set " & Chr(34) & " + mapperinfo(" & mapperID & ", 17)")
+                InteropServices.MapInfoApplication.Do("Run Command coord")
+
+                updatePageText()
+
+                'move extent
+                moveExtent()
+            End If
+        End Sub
+
+        Private Sub ToolStripButton6_Click(sender As Object, e As EventArgs) Handles ToolStripButton6.Click
+            'move 1 page on
+            If ToolStripComboBox1.Items.Count - 1 > ToolStripComboBox1.SelectedIndex Then
+                ToolStripComboBox1.SelectedIndex = ToolStripComboBox1.SelectedIndex + 1
+            End If
+        End Sub
+
+        Private Sub ToolStripButton5_Click(sender As Object, e As EventArgs) Handles ToolStripButton5.Click
+            'move 1 page back
+            If ToolStripComboBox1.SelectedIndex > 0 Then
+                ToolStripComboBox1.SelectedIndex = ToolStripComboBox1.SelectedIndex - 1
+            End If
+        End Sub
+
+        Private Sub ToolStripButton7_Click(sender As Object, e As EventArgs) Handles ToolStripButton7.Click
+            'last page
+            ToolStripComboBox1.SelectedIndex = ToolStripComboBox1.Items.Count - 1
+        End Sub
+
+        Private Sub ToolStripButton4_Click(sender As Object, e As EventArgs) Handles ToolStripButton4.Click
+            'first page
+            ToolStripComboBox1.SelectedIndex = 0
         End Sub
     End Class
 End Namespace

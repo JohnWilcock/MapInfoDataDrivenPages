@@ -89,6 +89,7 @@ Namespace MapInfoDataDrivenPages
             Me.ToolStripButton7 = New System.Windows.Forms.ToolStripButton()
             Me.ToolStripSeparator2 = New System.Windows.Forms.ToolStripSeparator()
             Me.ToolStripDropDownButton1 = New System.Windows.Forms.ToolStripDropDownButton()
+            Me.TabPage4 = New System.Windows.Forms.TabPage()
             Me.ToolStripContainer1.ContentPanel.SuspendLayout()
             Me.ToolStripContainer1.TopToolStripPanel.SuspendLayout()
             Me.ToolStripContainer1.SuspendLayout()
@@ -129,6 +130,7 @@ Namespace MapInfoDataDrivenPages
             '
             Me.TabControl1.Controls.Add(Me.TabPage1)
             Me.TabControl1.Controls.Add(Me.TabPage2)
+            Me.TabControl1.Controls.Add(Me.TabPage4)
             Me.TabControl1.Controls.Add(Me.TabPage3)
             resources.ApplyResources(Me.TabControl1, "TabControl1")
             Me.TabControl1.Name = "TabControl1"
@@ -441,6 +443,7 @@ Namespace MapInfoDataDrivenPages
             resources.ApplyResources(Me.NumericUpDown4, "NumericUpDown4")
             Me.NumericUpDown4.Maximum = New Decimal(New Integer() {400, 0, 0, 0})
             Me.NumericUpDown4.Name = "NumericUpDown4"
+            Me.NumericUpDown4.Value = New Decimal(New Integer() {200, 0, 0, 0})
             '
             'Label9
             '
@@ -481,7 +484,6 @@ Namespace MapInfoDataDrivenPages
             'ToolStripButton2
             '
             Me.ToolStripButton2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image
-            Me.ToolStripButton2.Image = Global.My.Resources.Resources.refresh
             resources.ApplyResources(Me.ToolStripButton2, "ToolStripButton2")
             Me.ToolStripButton2.Name = "ToolStripButton2"
             '
@@ -535,6 +537,12 @@ Namespace MapInfoDataDrivenPages
             resources.ApplyResources(Me.ToolStripDropDownButton1, "ToolStripDropDownButton1")
             Me.ToolStripDropDownButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text
             Me.ToolStripDropDownButton1.Name = "ToolStripDropDownButton1"
+            '
+            'TabPage4
+            '
+            resources.ApplyResources(Me.TabPage4, "TabPage4")
+            Me.TabPage4.Name = "TabPage4"
+            Me.TabPage4.UseVisualStyleBackColor = True
             '
             'Dlg
             '
@@ -633,6 +641,7 @@ Namespace MapInfoDataDrivenPages
         Friend WithEvents Button5 As System.Windows.Forms.Button
         Friend WithEvents TextBox1 As System.Windows.Forms.TextBox
         Friend WithEvents Button6 As System.Windows.Forms.Button
+        Friend WithEvents TabPage4 As System.Windows.Forms.TabPage
 
 #End Region
 
