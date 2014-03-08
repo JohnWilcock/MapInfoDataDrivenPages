@@ -86,6 +86,12 @@
     <Compile Include="AboutBox1.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="queryInfo.Designer.vb">
+      <DependentUpon>queryInfo.vb</DependentUpon>
+    </Compile>
+    <Compile Include="queryInfo.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="XML.vb" />
     <Compile Include="Controller.vb" />
     <Compile Include="InteropHelper.vb" />
@@ -125,6 +131,9 @@
       <SubType>Designer</SubType>
       <DependentUpon>Dlg.vb</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="queryInfo.resx">
+      <DependentUpon>queryInfo.vb</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <None Include="My Project\Application.myapp">
@@ -162,6 +171,27 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\refresh.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Save_6530.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Open_6529.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\3%28three%29columns_9714.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\GotoNextRow_289.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\GotoNextRow_289 - Copy.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\GotoFirstRow_287.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\GotoLastRow_288.png" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.VisualBasic.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

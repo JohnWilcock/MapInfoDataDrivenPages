@@ -33,8 +33,11 @@ Namespace MapInfoDataDrivenPages
             Return Int32.Parse(evalResult)
 
         End Function
-
 #End Region
+
+
+
+
 
 #Region "[GET WINDOW INFORMATION]"
 

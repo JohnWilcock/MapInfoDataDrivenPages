@@ -47,12 +47,14 @@ Include "C:\Program Files (x86)\MapInfo\MAPBASIC\auto_lib.def"
 Declare Method GetResItemStr Class "MapInfoDataDrivenPages.Controller" Lib "MapInfoDataDrivenPages.dll" (ByVal itemName As String) As String
 Declare Method ShowDlg Class "MapInfoDataDrivenPages.Controller" Lib "MapInfoDataDrivenPages.dll" (ByVal hwnd as Integer) As Logical
 Declare Method CloseDlg Class "MapInfoDataDrivenPages.Controller" Lib "MapInfoDataDrivenPages.dll" () As Logical
+Declare Method showAbout Class "MapInfoDataDrivenPages.Controller" Lib "MapInfoDataDrivenPages.dll" () As integer
 'Declare Method XsecLine Class "ProfileTool.Dlg" Lib "ProfileTool.dll" (ByVal ReturnString as string) As Logical
 
 '****************************************************************************
 ' Declare sub procedures
 '****************************************************************************
 Declare Sub Main
+declare sub about
 Declare Sub EndHandler 
 Declare Sub loader
 Declare Sub DDP
@@ -110,7 +112,7 @@ end if
 	Create Menu "MapInfoDataDrivenPages" as
 		"Show &Tool" Calling loader,
 		"(-",
-		'"&About" calling ShowAbout,
+		"&About" calling About,
 		"E&xit" calling bye
 
   	Alter Menu "Tools" Add "MapInfoDataDrivenPages" As "MapInfoDataDrivenPages"
@@ -123,6 +125,10 @@ end if
     Resume Next
 End Sub
 
+sub about
+	dim ret as integer
+	ret = showAbout()
+end sub
 '****************************************************************************
 ' 
 '

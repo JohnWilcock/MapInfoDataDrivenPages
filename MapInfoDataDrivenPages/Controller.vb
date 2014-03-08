@@ -66,6 +66,11 @@ Namespace MapInfoDataDrivenPages
 
         End Function
 
+        Public Shared Function showAbout() As Integer
+            Dim AB As New AboutBox1
+            AB.ShowDialog()
+            Return 1
+        End Function
         ''' <summary>
         ''' This function is called from MapBasic code
         ''' to display the DDP Tool dialog.

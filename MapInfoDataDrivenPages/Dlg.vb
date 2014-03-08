@@ -68,8 +68,17 @@ Namespace MapInfoDataDrivenPages
         Public LayoutIDList As New List(Of String)
         Public pageList As New List(Of String)
 
+        Public LayoutTableRowCount As Integer = 1
+
+        Public pageDrivenQueryList As New List(Of String)
+        Public pageDrivenQueryTables As New List(Of String)
+        Public pageDrivenQueryListSub As New List(Of String)
+        Public pageDrivenQueryForms As New List(Of queryInfo)
+
         Public pageTextRowIdList As New List(Of String)
         Public pageTextColumnHeaderList As New List(Of String)
+        Public pageTextPackedRowIdList As New List(Of String)
+        Public pageTextPackedColumnHeaderList As New List(Of String)
 
         'lists for interval xy
         Public Shared xIntervalList As New List(Of Double)
@@ -89,14 +98,19 @@ Namespace MapInfoDataDrivenPages
             'set standard text in combo boxes
             ComboBox7.Text = "JPG"
             NumericUpDown4.Value = 200   'resolution
-            ComboBox10.Text = "mm" ' layout units for layout buffer
+            'ComboBox10.Text = "mm" ' layout units for layout buffer
             NumericUpDown1.Value = 125
             NumericUpDown2.Value = 125
             ComboBox6.SelectedIndex = 0
 
             'check for blank file used in search operations - this is used as a flag to see if OSTools has been installed, if not it is autoregestered by the MBX
             CreateBlank()
+
+
+
         End Sub
+
+
 
         ''' <summary>
         ''' Parameterised Construction
@@ -118,6 +132,7 @@ Namespace MapInfoDataDrivenPages
         ''' <param name="e"></param> 
         Private Sub NViewDlg_Load(ByVal sender As Object, ByVal e As EventArgs) Handles MyBase.Load
             CreateBlank()
+            InteropHelper.theDlg = Me
             If firstLoad = True Then
                 firstLoad = False
 
@@ -189,7 +204,6 @@ Namespace MapInfoDataDrivenPages
 
 
 
-
         Private Sub ToolStripContainer1_ContentPanel_Load(sender As Object, e As EventArgs)
 
         End Sub
@@ -210,6 +224,13 @@ Namespace MapInfoDataDrivenPages
             pageList.Clear()
             ToolStripDropDownButton1.DropDownItems.Clear()
             ToolStripComboBox1.Items.Clear()
+            'LayoutTableRowCount = 1
+            'need to wipe any existing page text
+
+            pageDrivenQueryForms.Clear()
+            pageDrivenQueryList.Clear()
+            pageDrivenQueryListSub.Clear()
+            pageDrivenQueryTables.Clear()
         End Sub
 
         Sub resetSetupFields()
@@ -312,14 +333,16 @@ Namespace MapInfoDataDrivenPages
         Sub populateListofColumnsFromLayer(ByVal tableName As String)
             ComboBox3.Items.Clear()
             ComboBox4.Items.Clear()
+            ComboBox9.Items.Clear()
 
             getColumnsOfChosenTable(tableName)
 
             ComboBox3.Items.AddRange(ColumnList.ToArray)
             ComboBox4.Items.AddRange(ColumnList.ToArray)
+            ComboBox9.Items.AddRange(ColumnList.ToArray)
 
             'add list of columns to page text 
-            'TODO - also add object information posibilities e.g area, length
+            'TODO - also add object information posibilities e.g area, length, scale
             ToolStripDropDownButton1.DropDownItems.Clear()
             For x As Integer = 0 To ColumnList.Count - 1
                 ToolStripDropDownButton1.DropDownItems.Add(ColumnList(x))
@@ -352,7 +375,8 @@ Namespace MapInfoDataDrivenPages
             InteropServices.MapInfoApplication.Do("Create Text into Window " & layoutID & " " & tempString & " ( 10, 10 ) ( 20, 10 ) ")
 
             'add to varibles
-            pageTextRowIdList.Add(currentLayoutRow)
+            'pageTextRowIdList.Add(currentLayoutRow)
+            pageTextRowIdList.Add(InteropServices.MapInfoApplication.Eval("tableInfo(" & LayoutN & ", 8 )"))
             pageTextColumnHeaderList.Add(column)
 
             'check for xml file and add it.
@@ -455,6 +479,7 @@ Namespace MapInfoDataDrivenPages
         End Sub
 
         Public Sub cycleThroughFeatures()
+
             'set up MI dim for MBR object (.net cannot accept this
             InteropServices.MapInfoApplication.Do("dim currentObject as object")
 
@@ -521,6 +546,14 @@ Namespace MapInfoDataDrivenPages
                         ToolStripComboBox1.SelectedIndex = ToolStripComboBox1.SelectedIndex + 1
                     End If
 
+                    'execute any page driven queries
+                    If pageDrivenQueryList.Count > 0 Then
+                        'place index page values into query
+                        substituteIndexValues()
+
+                        'run queries
+                        executeQueries()
+                    End If
 
 
                 End If
@@ -531,6 +564,12 @@ Namespace MapInfoDataDrivenPages
                 'export chosen layout to image
                 exportJPG(layoutID, Path.Combine(TextBox1.Text, InteropServices.MapInfoApplication.Eval(tableName & "." & ComboBox3.Text)), pageWidth, pageHeight)
                 i = i + 1
+
+                'remove queries after export
+                If pageDrivenQueryList.Count > 0 Then
+                    removeQueries()
+                End If
+
                 InteropServices.MapInfoApplication.Do("Fetch Next From " & tableName)
             End While
 
@@ -576,18 +615,31 @@ Namespace MapInfoDataDrivenPages
 
             If RadioButton1.Checked Then
                 'if best fit scaling
-                Select Case ComboBox6.Text
-                    Case "Percentage"
-                        ZoomOrScale = ((maxX - minX) / 100) * NumericUpDown2.Value
-                    Case "Map Units"
-                        ZoomOrScale = (maxX - minX) + (NumericUpDown2.Value * 2)
-                    Case "Page Units"
-
-                End Select
+                If InteropServices.MapInfoApplication.Eval("ObjectInfo(" & tableName & ".obj, 1 )") <> 5 Then
+                    'if line or polygon
+                    Select Case ComboBox6.Text
+                        Case "Percentage"
+                            ZoomOrScale = ((maxX - minX) / 100) * NumericUpDown2.Value
+                        Case "Map Units"
+                            ZoomOrScale = (maxX - minX) + (NumericUpDown2.Value * 2)
+                        Case "Page Units"
+                            'todo
+                    End Select
+                Else
+                    'if point
+                    Select Case ComboBox5.Text
+                        Case "Percentage"
+                            'there is no percentage for points as they have no MBR
+                        Case "Map Units"
+                            ZoomOrScale = (maxX - minX) + (NumericUpDown1.Value * 2)
+                        Case "Page Units"
+                            'todo
+                    End Select
+                End If
+                'round
+                ZoomOrScale = Math.Floor(Math.Round(CDbl(ZoomOrScale) / NumericUpDown3.Value, 0)) * NumericUpDown3.Value
 
                 ZoomOrScaleString = " Zoom " & ZoomOrScale & " units " & Chr(34) & Units & Chr(34)
-
-
             Else
                 'map set by set scale 
                 If RadioButton2.Checked Then
@@ -601,8 +653,8 @@ Namespace MapInfoDataDrivenPages
             End If
 
 
-            'see: Changing the Current View of the Map 
-            InteropServices.MapInfoApplication.Do("Set Map window " & mapperID & " Center(" & minX + ((maxX - minX) / 2) & ", " & minY + ((maxY - minY) / 2) & ") " & ZoomOrScaleString)
+                'see: Changing the Current View of the Map 
+                InteropServices.MapInfoApplication.Do("Set Map window " & mapperID & " Center(" & minX + ((maxX - minX) / 2) & ", " & minY + ((maxY - minY) / 2) & ") " & ZoomOrScaleString)
 
 
 
@@ -782,5 +834,195 @@ Namespace MapInfoDataDrivenPages
             'first page
             ToolStripComboBox1.SelectedIndex = 0
         End Sub
+
+        Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click
+            loadQueryInfo()
+        End Sub
+
+        Sub loadQueryInfo()
+            Dim QI As New queryInfo
+            QI.ComboBox1.Items.AddRange(tableNames.ToArray)
+
+
+            'add table name to box to allow query of columns
+            QI.tablename = ComboBox1.Text
+            QI.setPageColumns()
+
+            QI.ShowDialog()
+        End Sub
+
+        Sub executeQueries()
+            'for each query
+            Dim RandomClass As New Random()
+
+
+            For i As Integer = 0 To pageDrivenQueryList.Count - 1
+
+                'excute query and place into rand
+                pageDrivenQueryTables.Add(RandomClass.Next(1000000, 9999999))
+                MsgBox("Select * from " & MapInfoDataDrivenPages.InteropHelper.theDlg.DataGridView1.Rows.Item(i).Cells(1).Value & " where " & pageDrivenQueryListSub(i) & " into _" & pageDrivenQueryTables(i))
+                InteropServices.MapInfoApplication.Do("Select * from " & MapInfoDataDrivenPages.InteropHelper.theDlg.DataGridView1.Rows.Item(i).Cells(1).Value & " where " & pageDrivenQueryListSub(i) & " into _" & pageDrivenQueryTables(i))
+
+                'add to mapper
+                InteropServices.MapInfoApplication.Do("Add Map Window " & MapperIDList(ComboBox8.SelectedIndex) & " Auto Layer _" & pageDrivenQueryTables(i))
+
+            Next
+
+
+
+
+        End Sub
+
+        Sub removeQueries()
+            'cycle through random number table and remove each query from mapper
+            For i As Integer = 0 To pageDrivenQueryList.Count - 1
+                InteropServices.MapInfoApplication.Do("Remove Map Window " & MapperIDList(ComboBox8.SelectedIndex) & " Layer _" & pageDrivenQueryTables(i))
+            Next
+            'clear query lists
+            pageDrivenQueryTables.Clear()
+            pageDrivenQueryListSub.Clear()
+        End Sub
+
+        Sub substituteIndexValues()
+            Dim queryTerms() As String
+            pageDrivenQueryListSub.Clear()
+
+            For i As Integer = 0 To pageDrivenQueryList.Count - 1
+                queryTerms = pageDrivenQueryList(i).Split(" ")
+                For j As Integer = 0 To queryTerms.Length - 1
+                    If queryTerms(j).Contains(ComboBox1.Text & ".") Then
+                        pageDrivenQueryListSub.Add(pageDrivenQueryList(i).Replace(queryTerms(j), Chr(34) & InteropServices.MapInfoApplication.Eval(queryTerms(j)) & Chr(34)))
+                    End If
+
+                Next
+
+            Next
+        End Sub
+
+        Private Sub DataGridView1_CellContentClick(sender As Object, e As DataGridViewCellEventArgs) Handles DataGridView1.CellContentClick
+            pageDrivenQueryForms(DataGridView1.CurrentCellAddress.Y).caller = DataGridView1.CurrentCellAddress.Y
+            pageDrivenQueryForms(DataGridView1.CurrentCellAddress.Y).ShowDialog()
+
+        End Sub
+
+        Private Sub Button8_Click(sender As Object, e As EventArgs) Handles Button8.Click
+            pageDrivenQueryList.RemoveAt(pageDrivenQueryForms(DataGridView1.CurrentCellAddress.Y).caller)
+            pageDrivenQueryForms.RemoveAt(DataGridView1.CurrentCellAddress.Y)
+            DataGridView1.Rows.RemoveAt(DataGridView1.CurrentCellAddress.Y)
+        End Sub
+
+        Private Sub ComboBox7_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ComboBox7.SelectedIndexChanged
+
+        End Sub
+
+        Private Sub Button9_Click(sender As Object, e As EventArgs) Handles Button9.Click
+            InteropServices.MapInfoApplication.Do("Run Menu Command 111")
+        End Sub
+
+        Private Sub ToolStripButton1_Click(sender As Object, e As EventArgs) Handles ToolStripButton1.Click
+            'save
+            ' Create XmlWriterSettings.
+            Dim settings As XmlWriterSettings = New XmlWriterSettings()
+            settings.Indent = True
+            settings.OmitXmlDeclaration = True
+            settings.ConformanceLevel = ConformanceLevel.Auto
+
+            Dim xmlstring As New System.Text.StringBuilder
+
+
+            'pick a file to save to (default to workspace filepath)
+            Dim FSA As New SaveFileDialog
+            FSA.Filter = "DDP xml files (*.ddp)|*.DDP"
+            FSA.Title = "choose a file name to save this data driven pages setup"
+            FSA.ShowDialog()
+
+            'condense list of dynamic row ids (page text) as this table is packed on a " save workspace" removing all empty rows
+            setPageTextPackedRowIdList()
+
+            'create string for xml
+            ' Create XmlWriter.
+            Using writer As XmlWriter = XmlWriter.Create(xmlstring, settings)
+                ' Begin writing.
+                writer.WriteStartDocument()
+                writer.WriteStartElement("DDP")
+                'write page text xml
+                writer.WriteStartElement("PAGETEXT")
+                For i As Integer = 0 To pageTextPackedRowIdList.Count - 1
+                    writer.WriteStartElement("TEXT")
+                    writer.WriteElementString("ROWID", pageTextPackedRowIdList(i))
+                    writer.WriteElementString("COLNAME", pageTextPackedColumnHeaderList(i))
+                    writer.WriteEndElement()
+                Next
+                writer.WriteEndElement()
+                'write page query xml
+                writer.WriteStartElement("PAGEQUERIES")
+                For i As Integer = 0 To DataGridView1.Rows.Count - 1
+                    writer.WriteStartElement("QUERY")
+                    writer.WriteElementString("QUERYID", i)
+                    writer.WriteElementString("QUERYLAYER", DataGridView1.Rows.Item(i).Cells(1).Value)
+                    writer.WriteElementString("QUERYDEF", pageDrivenQueryList(i))
+                    writer.WriteEndElement()
+                Next
+                writer.WriteEndElement()
+                writer.WriteEndElement()
+
+                writer.WriteEndDocument()
+            End Using
+            'write page file
+            Dim fileToSave As New System.IO.StreamWriter(FSA.FileName)
+            fileToSave.WriteLine(xmlstring.ToString)
+            fileToSave.Close()
+
+        End Sub
+
+
+
+        Private Sub ToolStripButton3_Click(sender As Object, e As EventArgs) Handles ToolStripButton3.Click
+            'show index table
+            If ComboBox1.Text <> "" Then
+                InteropServices.MapInfoApplication.Do("Browse * From " & ComboBox1.Text)
+            Else
+                MsgBox("No index layer selected")
+            End If
+
+        End Sub
+
+        Sub setPageTextPackedRowIdList()
+            Dim layoutID As String = LayoutIDList(ComboBox2.SelectedIndex)
+            Dim layoutName As String = ComboBox2.Text
+            Dim LayoutN As String = InteropServices.MapInfoApplication.Eval("WindowInfo(" & layoutID & ", 10 )")
+            Dim validRowCount As Integer = 1
+            pageTextPackedRowIdList.Clear()
+            pageTextPackedColumnHeaderList.Clear()
+
+            InteropServices.MapInfoApplication.Do("Fetch First From " & ComboBox1.Text)
+            For i As Integer = 1 To InteropServices.MapInfoApplication.Eval("tableinfo(" & LayoutN & " , 8)")
+                If InteropServices.MapInfoApplication.Eval("EOT(" & layoutName & ")") = "F" Then
+                    'is valid row
+                    'is it a dynamic row ?
+                    If isDynamicRow(i) Then
+                        pageTextPackedRowIdList.Add(validRowCount)
+                        pageTextPackedColumnHeaderList.Add(pageTextColumnHeaderList(i - 1))
+                    End If
+                    validRowCount = validRowCount + 1
+                Else
+                    'deleted row
+
+                End If
+                InteropServices.MapInfoApplication.Do("Fetch Next From " & ComboBox1.Text)
+            Next
+
+        End Sub
+
+        Function isDynamicRow(ByVal rowNum As Integer) As Boolean
+            'cycle through PageTextRowIdList and return value indicating if the row number in question is present
+            isDynamicRow = False
+            For x As Integer = 0 To pageTextRowIdList.Count - 1
+                If pageTextRowIdList(x) = rowNum Then
+                    isDynamicRow = True
+                End If
+            Next
+
+        End Function
     End Class
 End Namespace

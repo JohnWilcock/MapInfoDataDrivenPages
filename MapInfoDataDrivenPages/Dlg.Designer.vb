@@ -31,7 +31,6 @@ Namespace MapInfoDataDrivenPages
             Me.TabControl1 = New System.Windows.Forms.TabControl()
             Me.TabPage1 = New System.Windows.Forms.TabPage()
             Me.GroupBox2 = New System.Windows.Forms.GroupBox()
-            Me.Label12 = New System.Windows.Forms.Label()
             Me.ComboBox8 = New System.Windows.Forms.ComboBox()
             Me.Label11 = New System.Windows.Forms.Label()
             Me.Button4 = New System.Windows.Forms.Button()
@@ -52,7 +51,6 @@ Namespace MapInfoDataDrivenPages
             Me.Label7 = New System.Windows.Forms.Label()
             Me.NumericUpDown3 = New System.Windows.Forms.NumericUpDown()
             Me.GroupBox3 = New System.Windows.Forms.GroupBox()
-            Me.ComboBox10 = New System.Windows.Forms.ComboBox()
             Me.NumericUpDown2 = New System.Windows.Forms.NumericUpDown()
             Me.ComboBox6 = New System.Windows.Forms.ComboBox()
             Me.NumericUpDown1 = New System.Windows.Forms.NumericUpDown()
@@ -62,11 +60,19 @@ Namespace MapInfoDataDrivenPages
             Me.RadioButton3 = New System.Windows.Forms.RadioButton()
             Me.RadioButton2 = New System.Windows.Forms.RadioButton()
             Me.RadioButton1 = New System.Windows.Forms.RadioButton()
+            Me.TabPage4 = New System.Windows.Forms.TabPage()
+            Me.GroupBox6 = New System.Windows.Forms.GroupBox()
+            Me.Button8 = New System.Windows.Forms.Button()
+            Me.Button7 = New System.Windows.Forms.Button()
+            Me.DataGridView1 = New System.Windows.Forms.DataGridView()
+            Me.Column1 = New System.Windows.Forms.DataGridViewTextBoxColumn()
+            Me.Column2 = New System.Windows.Forms.DataGridViewTextBoxColumn()
             Me.TabPage3 = New System.Windows.Forms.TabPage()
             Me.GroupBox5 = New System.Windows.Forms.GroupBox()
+            Me.Button9 = New System.Windows.Forms.Button()
+            Me.Label12 = New System.Windows.Forms.Label()
             Me.Label13 = New System.Windows.Forms.Label()
             Me.ProgressBar2 = New System.Windows.Forms.ProgressBar()
-            Me.ComboBox11 = New System.Windows.Forms.ComboBox()
             Me.Button3 = New System.Windows.Forms.Button()
             Me.GroupBox4 = New System.Windows.Forms.GroupBox()
             Me.ProgressBar1 = New System.Windows.Forms.ProgressBar()
@@ -89,7 +95,9 @@ Namespace MapInfoDataDrivenPages
             Me.ToolStripButton7 = New System.Windows.Forms.ToolStripButton()
             Me.ToolStripSeparator2 = New System.Windows.Forms.ToolStripSeparator()
             Me.ToolStripDropDownButton1 = New System.Windows.Forms.ToolStripDropDownButton()
-            Me.TabPage4 = New System.Windows.Forms.TabPage()
+            Me.GroupBox7 = New System.Windows.Forms.GroupBox()
+            Me.Button10 = New System.Windows.Forms.Button()
+            Me.ComboBox10 = New System.Windows.Forms.ComboBox()
             Me.ToolStripContainer1.ContentPanel.SuspendLayout()
             Me.ToolStripContainer1.TopToolStripPanel.SuspendLayout()
             Me.ToolStripContainer1.SuspendLayout()
@@ -102,11 +110,15 @@ Namespace MapInfoDataDrivenPages
             Me.GroupBox3.SuspendLayout()
             CType(Me.NumericUpDown2, System.ComponentModel.ISupportInitialize).BeginInit()
             CType(Me.NumericUpDown1, System.ComponentModel.ISupportInitialize).BeginInit()
+            Me.TabPage4.SuspendLayout()
+            Me.GroupBox6.SuspendLayout()
+            CType(Me.DataGridView1, System.ComponentModel.ISupportInitialize).BeginInit()
             Me.TabPage3.SuspendLayout()
             Me.GroupBox5.SuspendLayout()
             Me.GroupBox4.SuspendLayout()
             CType(Me.NumericUpDown4, System.ComponentModel.ISupportInitialize).BeginInit()
             Me.ToolStrip1.SuspendLayout()
+            Me.GroupBox7.SuspendLayout()
             Me.SuspendLayout()
             '
             'ToolStripContainer1
@@ -145,7 +157,6 @@ Namespace MapInfoDataDrivenPages
             '
             'GroupBox2
             '
-            Me.GroupBox2.Controls.Add(Me.Label12)
             Me.GroupBox2.Controls.Add(Me.ComboBox8)
             Me.GroupBox2.Controls.Add(Me.Label11)
             Me.GroupBox2.Controls.Add(Me.Button4)
@@ -162,11 +173,6 @@ Namespace MapInfoDataDrivenPages
             resources.ApplyResources(Me.GroupBox2, "GroupBox2")
             Me.GroupBox2.Name = "GroupBox2"
             Me.GroupBox2.TabStop = False
-            '
-            'Label12
-            '
-            resources.ApplyResources(Me.Label12, "Label12")
-            Me.Label12.Name = "Label12"
             '
             'ComboBox8
             '
@@ -247,6 +253,7 @@ Namespace MapInfoDataDrivenPages
             '
             'TabPage2
             '
+            Me.TabPage2.Controls.Add(Me.GroupBox7)
             Me.TabPage2.Controls.Add(Me.GroupBox1)
             resources.ApplyResources(Me.TabPage2, "TabPage2")
             Me.TabPage2.Name = "TabPage2"
@@ -274,6 +281,7 @@ Namespace MapInfoDataDrivenPages
             '
             'ComboBox9
             '
+            Me.ComboBox9.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
             Me.ComboBox9.FormattingEnabled = True
             resources.ApplyResources(Me.ComboBox9, "ComboBox9")
             Me.ComboBox9.Name = "ComboBox9"
@@ -286,11 +294,13 @@ Namespace MapInfoDataDrivenPages
             'NumericUpDown3
             '
             resources.ApplyResources(Me.NumericUpDown3, "NumericUpDown3")
+            Me.NumericUpDown3.Maximum = New Decimal(New Integer() {100000, 0, 0, 0})
+            Me.NumericUpDown3.Minimum = New Decimal(New Integer() {1, 0, 0, 0})
             Me.NumericUpDown3.Name = "NumericUpDown3"
+            Me.NumericUpDown3.Value = New Decimal(New Integer() {1, 0, 0, 0})
             '
             'GroupBox3
             '
-            Me.GroupBox3.Controls.Add(Me.ComboBox10)
             Me.GroupBox3.Controls.Add(Me.NumericUpDown2)
             Me.GroupBox3.Controls.Add(Me.ComboBox6)
             Me.GroupBox3.Controls.Add(Me.NumericUpDown1)
@@ -301,32 +311,24 @@ Namespace MapInfoDataDrivenPages
             Me.GroupBox3.Name = "GroupBox3"
             Me.GroupBox3.TabStop = False
             '
-            'ComboBox10
-            '
-            Me.ComboBox10.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
-            Me.ComboBox10.FormattingEnabled = True
-            Me.ComboBox10.Items.AddRange(New Object() {resources.GetString("ComboBox10.Items"), resources.GetString("ComboBox10.Items1")})
-            resources.ApplyResources(Me.ComboBox10, "ComboBox10")
-            Me.ComboBox10.Name = "ComboBox10"
-            '
             'NumericUpDown2
             '
             resources.ApplyResources(Me.NumericUpDown2, "NumericUpDown2")
-            Me.NumericUpDown2.Maximum = New Decimal(New Integer() {1000, 0, 0, 0})
+            Me.NumericUpDown2.Maximum = New Decimal(New Integer() {100000, 0, 0, 0})
             Me.NumericUpDown2.Name = "NumericUpDown2"
             '
             'ComboBox6
             '
             Me.ComboBox6.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
             Me.ComboBox6.FormattingEnabled = True
-            Me.ComboBox6.Items.AddRange(New Object() {resources.GetString("ComboBox6.Items"), resources.GetString("ComboBox6.Items1"), resources.GetString("ComboBox6.Items2")})
+            Me.ComboBox6.Items.AddRange(New Object() {resources.GetString("ComboBox6.Items"), resources.GetString("ComboBox6.Items1")})
             resources.ApplyResources(Me.ComboBox6, "ComboBox6")
             Me.ComboBox6.Name = "ComboBox6"
             '
             'NumericUpDown1
             '
             resources.ApplyResources(Me.NumericUpDown1, "NumericUpDown1")
-            Me.NumericUpDown1.Maximum = New Decimal(New Integer() {1000, 0, 0, 0})
+            Me.NumericUpDown1.Maximum = New Decimal(New Integer() {100000, 0, 0, 0})
             Me.NumericUpDown1.Name = "NumericUpDown1"
             '
             'Label6
@@ -343,7 +345,7 @@ Namespace MapInfoDataDrivenPages
             '
             Me.ComboBox5.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
             Me.ComboBox5.FormattingEnabled = True
-            Me.ComboBox5.Items.AddRange(New Object() {resources.GetString("ComboBox5.Items"), resources.GetString("ComboBox5.Items1")})
+            Me.ComboBox5.Items.AddRange(New Object() {resources.GetString("ComboBox5.Items")})
             resources.ApplyResources(Me.ComboBox5, "ComboBox5")
             Me.ComboBox5.Name = "ComboBox5"
             '
@@ -367,6 +369,57 @@ Namespace MapInfoDataDrivenPages
             Me.RadioButton1.TabStop = True
             Me.RadioButton1.UseVisualStyleBackColor = True
             '
+            'TabPage4
+            '
+            Me.TabPage4.Controls.Add(Me.GroupBox6)
+            resources.ApplyResources(Me.TabPage4, "TabPage4")
+            Me.TabPage4.Name = "TabPage4"
+            Me.TabPage4.UseVisualStyleBackColor = True
+            '
+            'GroupBox6
+            '
+            Me.GroupBox6.Controls.Add(Me.Button8)
+            Me.GroupBox6.Controls.Add(Me.Button7)
+            Me.GroupBox6.Controls.Add(Me.DataGridView1)
+            resources.ApplyResources(Me.GroupBox6, "GroupBox6")
+            Me.GroupBox6.Name = "GroupBox6"
+            Me.GroupBox6.TabStop = False
+            '
+            'Button8
+            '
+            resources.ApplyResources(Me.Button8, "Button8")
+            Me.Button8.Name = "Button8"
+            Me.Button8.UseVisualStyleBackColor = True
+            '
+            'Button7
+            '
+            resources.ApplyResources(Me.Button7, "Button7")
+            Me.Button7.Name = "Button7"
+            Me.Button7.UseVisualStyleBackColor = True
+            '
+            'DataGridView1
+            '
+            Me.DataGridView1.AllowUserToAddRows = False
+            Me.DataGridView1.AllowUserToDeleteRows = False
+            Me.DataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
+            Me.DataGridView1.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {Me.Column1, Me.Column2})
+            resources.ApplyResources(Me.DataGridView1, "DataGridView1")
+            Me.DataGridView1.Name = "DataGridView1"
+            Me.DataGridView1.ReadOnly = True
+            '
+            'Column1
+            '
+            resources.ApplyResources(Me.Column1, "Column1")
+            Me.Column1.Name = "Column1"
+            Me.Column1.ReadOnly = True
+            '
+            'Column2
+            '
+            Me.Column2.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill
+            resources.ApplyResources(Me.Column2, "Column2")
+            Me.Column2.Name = "Column2"
+            Me.Column2.ReadOnly = True
+            '
             'TabPage3
             '
             Me.TabPage3.Controls.Add(Me.GroupBox5)
@@ -377,13 +430,25 @@ Namespace MapInfoDataDrivenPages
             '
             'GroupBox5
             '
+            Me.GroupBox5.Controls.Add(Me.Button9)
+            Me.GroupBox5.Controls.Add(Me.Label12)
             Me.GroupBox5.Controls.Add(Me.Label13)
             Me.GroupBox5.Controls.Add(Me.ProgressBar2)
-            Me.GroupBox5.Controls.Add(Me.ComboBox11)
             Me.GroupBox5.Controls.Add(Me.Button3)
             resources.ApplyResources(Me.GroupBox5, "GroupBox5")
             Me.GroupBox5.Name = "GroupBox5"
             Me.GroupBox5.TabStop = False
+            '
+            'Button9
+            '
+            resources.ApplyResources(Me.Button9, "Button9")
+            Me.Button9.Name = "Button9"
+            Me.Button9.UseVisualStyleBackColor = True
+            '
+            'Label12
+            '
+            resources.ApplyResources(Me.Label12, "Label12")
+            Me.Label12.Name = "Label12"
             '
             'Label13
             '
@@ -394,13 +459,6 @@ Namespace MapInfoDataDrivenPages
             '
             resources.ApplyResources(Me.ProgressBar2, "ProgressBar2")
             Me.ProgressBar2.Name = "ProgressBar2"
-            '
-            'ComboBox11
-            '
-            Me.ComboBox11.FormattingEnabled = True
-            Me.ComboBox11.Items.AddRange(New Object() {resources.GetString("ComboBox11.Items"), resources.GetString("ComboBox11.Items1")})
-            resources.ApplyResources(Me.ComboBox11, "ComboBox11")
-            Me.ComboBox11.Name = "ComboBox11"
             '
             'Button3
             '
@@ -478,18 +536,21 @@ Namespace MapInfoDataDrivenPages
             'ToolStripButton1
             '
             Me.ToolStripButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image
+            Me.ToolStripButton1.Image = Global.My.Resources.Resources.Save_6530
             resources.ApplyResources(Me.ToolStripButton1, "ToolStripButton1")
             Me.ToolStripButton1.Name = "ToolStripButton1"
             '
             'ToolStripButton2
             '
             Me.ToolStripButton2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image
+            Me.ToolStripButton2.Image = Global.My.Resources.Resources.Open_6529
             resources.ApplyResources(Me.ToolStripButton2, "ToolStripButton2")
             Me.ToolStripButton2.Name = "ToolStripButton2"
             '
             'ToolStripButton3
             '
             Me.ToolStripButton3.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image
+            Me.ToolStripButton3.Image = Global.My.Resources.Resources._3_three_columns_9714
             resources.ApplyResources(Me.ToolStripButton3, "ToolStripButton3")
             Me.ToolStripButton3.Name = "ToolStripButton3"
             '
@@ -500,13 +561,15 @@ Namespace MapInfoDataDrivenPages
             '
             'ToolStripButton4
             '
-            Me.ToolStripButton4.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text
+            Me.ToolStripButton4.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image
+            Me.ToolStripButton4.Image = Global.My.Resources.Resources.GotoFirstRow_287
             resources.ApplyResources(Me.ToolStripButton4, "ToolStripButton4")
             Me.ToolStripButton4.Name = "ToolStripButton4"
             '
             'ToolStripButton5
             '
-            Me.ToolStripButton5.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text
+            Me.ToolStripButton5.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image
+            Me.ToolStripButton5.Image = Global.My.Resources.Resources.GotoNextRow_289___Copy
             resources.ApplyResources(Me.ToolStripButton5, "ToolStripButton5")
             Me.ToolStripButton5.Name = "ToolStripButton5"
             '
@@ -517,13 +580,15 @@ Namespace MapInfoDataDrivenPages
             '
             'ToolStripButton6
             '
-            Me.ToolStripButton6.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text
+            Me.ToolStripButton6.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image
+            Me.ToolStripButton6.Image = Global.My.Resources.Resources.GotoNextRow_289
             resources.ApplyResources(Me.ToolStripButton6, "ToolStripButton6")
             Me.ToolStripButton6.Name = "ToolStripButton6"
             '
             'ToolStripButton7
             '
-            Me.ToolStripButton7.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text
+            Me.ToolStripButton7.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image
+            Me.ToolStripButton7.Image = Global.My.Resources.Resources.GotoLastRow_288
             resources.ApplyResources(Me.ToolStripButton7, "ToolStripButton7")
             Me.ToolStripButton7.Name = "ToolStripButton7"
             '
@@ -538,11 +603,26 @@ Namespace MapInfoDataDrivenPages
             Me.ToolStripDropDownButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text
             Me.ToolStripDropDownButton1.Name = "ToolStripDropDownButton1"
             '
-            'TabPage4
+            'GroupBox7
             '
-            resources.ApplyResources(Me.TabPage4, "TabPage4")
-            Me.TabPage4.Name = "TabPage4"
-            Me.TabPage4.UseVisualStyleBackColor = True
+            Me.GroupBox7.Controls.Add(Me.Button10)
+            Me.GroupBox7.Controls.Add(Me.ComboBox10)
+            resources.ApplyResources(Me.GroupBox7, "GroupBox7")
+            Me.GroupBox7.Name = "GroupBox7"
+            Me.GroupBox7.TabStop = False
+            '
+            'Button10
+            '
+            resources.ApplyResources(Me.Button10, "Button10")
+            Me.Button10.Name = "Button10"
+            Me.Button10.UseVisualStyleBackColor = True
+            '
+            'ComboBox10
+            '
+            Me.ComboBox10.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+            Me.ComboBox10.FormattingEnabled = True
+            resources.ApplyResources(Me.ComboBox10, "ComboBox10")
+            Me.ComboBox10.Name = "ComboBox10"
             '
             'Dlg
             '
@@ -568,6 +648,9 @@ Namespace MapInfoDataDrivenPages
             Me.GroupBox3.PerformLayout()
             CType(Me.NumericUpDown2, System.ComponentModel.ISupportInitialize).EndInit()
             CType(Me.NumericUpDown1, System.ComponentModel.ISupportInitialize).EndInit()
+            Me.TabPage4.ResumeLayout(False)
+            Me.GroupBox6.ResumeLayout(False)
+            CType(Me.DataGridView1, System.ComponentModel.ISupportInitialize).EndInit()
             Me.TabPage3.ResumeLayout(False)
             Me.GroupBox5.ResumeLayout(False)
             Me.GroupBox5.PerformLayout()
@@ -576,6 +659,7 @@ Namespace MapInfoDataDrivenPages
             CType(Me.NumericUpDown4, System.ComponentModel.ISupportInitialize).EndInit()
             Me.ToolStrip1.ResumeLayout(False)
             Me.ToolStrip1.PerformLayout()
+            Me.GroupBox7.ResumeLayout(False)
             Me.ResumeLayout(False)
 
         End Sub
@@ -631,17 +715,25 @@ Namespace MapInfoDataDrivenPages
         Friend WithEvents ComboBox8 As System.Windows.Forms.ComboBox
         Friend WithEvents Label11 As System.Windows.Forms.Label
         Friend WithEvents ToolStripSeparator2 As System.Windows.Forms.ToolStripSeparator
-        Friend WithEvents Label12 As System.Windows.Forms.Label
         Friend WithEvents ComboBox9 As System.Windows.Forms.ComboBox
-        Friend WithEvents ComboBox10 As System.Windows.Forms.ComboBox
         Friend WithEvents Label13 As System.Windows.Forms.Label
         Friend WithEvents ProgressBar2 As System.Windows.Forms.ProgressBar
-        Friend WithEvents ComboBox11 As System.Windows.Forms.ComboBox
         Friend WithEvents ProgressBar1 As System.Windows.Forms.ProgressBar
         Friend WithEvents Button5 As System.Windows.Forms.Button
         Friend WithEvents TextBox1 As System.Windows.Forms.TextBox
         Friend WithEvents Button6 As System.Windows.Forms.Button
         Friend WithEvents TabPage4 As System.Windows.Forms.TabPage
+        Friend WithEvents GroupBox6 As System.Windows.Forms.GroupBox
+        Friend WithEvents Button8 As System.Windows.Forms.Button
+        Friend WithEvents Button7 As System.Windows.Forms.Button
+        Friend WithEvents DataGridView1 As System.Windows.Forms.DataGridView
+        Friend WithEvents Column1 As System.Windows.Forms.DataGridViewTextBoxColumn
+        Friend WithEvents Column2 As System.Windows.Forms.DataGridViewTextBoxColumn
+        Friend WithEvents Label12 As System.Windows.Forms.Label
+        Friend WithEvents Button9 As System.Windows.Forms.Button
+        Friend WithEvents GroupBox7 As System.Windows.Forms.GroupBox
+        Friend WithEvents Button10 As System.Windows.Forms.Button
+        Friend WithEvents ComboBox10 As System.Windows.Forms.ComboBox
 
 #End Region
 

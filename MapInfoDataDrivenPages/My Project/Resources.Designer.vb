@@ -63,6 +63,16 @@ Namespace My.Resources
         '''<summary>
         '''  Looks up a localized resource of type System.Drawing.Bitmap.
         '''</summary>
+        Friend ReadOnly Property _3_three_columns_9714() As System.Drawing.Bitmap
+            Get
+                Dim obj As Object = ResourceManager.GetObject("3(three)columns_9714", resourceCulture)
+                Return CType(obj,System.Drawing.Bitmap)
+            End Get
+        End Property
+        
+        '''<summary>
+        '''  Looks up a localized resource of type System.Drawing.Bitmap.
+        '''</summary>
         Friend ReadOnly Property complex1() As System.Drawing.Bitmap
             Get
                 Dim obj As Object = ResourceManager.GetObject("complex1", resourceCulture)
@@ -100,6 +110,46 @@ Namespace My.Resources
         '''<summary>
         '''  Looks up a localized resource of type System.Drawing.Bitmap.
         '''</summary>
+        Friend ReadOnly Property GotoFirstRow_287() As System.Drawing.Bitmap
+            Get
+                Dim obj As Object = ResourceManager.GetObject("GotoFirstRow_287", resourceCulture)
+                Return CType(obj,System.Drawing.Bitmap)
+            End Get
+        End Property
+        
+        '''<summary>
+        '''  Looks up a localized resource of type System.Drawing.Bitmap.
+        '''</summary>
+        Friend ReadOnly Property GotoLastRow_288() As System.Drawing.Bitmap
+            Get
+                Dim obj As Object = ResourceManager.GetObject("GotoLastRow_288", resourceCulture)
+                Return CType(obj,System.Drawing.Bitmap)
+            End Get
+        End Property
+        
+        '''<summary>
+        '''  Looks up a localized resource of type System.Drawing.Bitmap.
+        '''</summary>
+        Friend ReadOnly Property GotoNextRow_289() As System.Drawing.Bitmap
+            Get
+                Dim obj As Object = ResourceManager.GetObject("GotoNextRow_289", resourceCulture)
+                Return CType(obj,System.Drawing.Bitmap)
+            End Get
+        End Property
+        
+        '''<summary>
+        '''  Looks up a localized resource of type System.Drawing.Bitmap.
+        '''</summary>
+        Friend ReadOnly Property GotoNextRow_289___Copy() As System.Drawing.Bitmap
+            Get
+                Dim obj As Object = ResourceManager.GetObject("GotoNextRow_289 - Copy", resourceCulture)
+                Return CType(obj,System.Drawing.Bitmap)
+            End Get
+        End Property
+        
+        '''<summary>
+        '''  Looks up a localized resource of type System.Drawing.Bitmap.
+        '''</summary>
         Friend ReadOnly Property MapInfow_100() As System.Drawing.Bitmap
             Get
                 Dim obj As Object = ResourceManager.GetObject("MapInfow_100", resourceCulture)
@@ -110,9 +160,29 @@ Namespace My.Resources
         '''<summary>
         '''  Looks up a localized resource of type System.Drawing.Bitmap.
         '''</summary>
+        Friend ReadOnly Property Open_6529() As System.Drawing.Bitmap
+            Get
+                Dim obj As Object = ResourceManager.GetObject("Open_6529", resourceCulture)
+                Return CType(obj,System.Drawing.Bitmap)
+            End Get
+        End Property
+        
+        '''<summary>
+        '''  Looks up a localized resource of type System.Drawing.Bitmap.
+        '''</summary>
         Friend ReadOnly Property refresh() As System.Drawing.Bitmap
             Get
                 Dim obj As Object = ResourceManager.GetObject("refresh", resourceCulture)
+                Return CType(obj,System.Drawing.Bitmap)
+            End Get
+        End Property
+        
+        '''<summary>
+        '''  Looks up a localized resource of type System.Drawing.Bitmap.
+        '''</summary>
+        Friend ReadOnly Property Save_6530() As System.Drawing.Bitmap
+            Get
+                Dim obj As Object = ResourceManager.GetObject("Save_6530", resourceCulture)
                 Return CType(obj,System.Drawing.Bitmap)
             End Get
         End Property
