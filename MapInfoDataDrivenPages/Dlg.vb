@@ -80,6 +80,8 @@ Namespace MapInfoDataDrivenPages
         Public pageTextPackedRowIdList As New List(Of String)
         Public pageTextPackedColumnHeaderList As New List(Of String)
 
+        Public CD As New ColorDialog
+
         'lists for interval xy
         Public Shared xIntervalList As New List(Of Double)
         Public Shared yIntervalList As New List(Of Double)
@@ -231,6 +233,8 @@ Namespace MapInfoDataDrivenPages
             pageDrivenQueryList.Clear()
             pageDrivenQueryListSub.Clear()
             pageDrivenQueryTables.Clear()
+
+            CD.Color = Color.Red
         End Sub
 
         Sub resetSetupFields()
@@ -255,12 +259,14 @@ Namespace MapInfoDataDrivenPages
         Public Sub resetMapperAndLayoutPickers()
             ComboBox8.Items.Clear()
             ComboBox2.Items.Clear()
+            ComboBox10.Items.Clear() 'overview
 
             populateListOfMappers()
             populateListOfLayouts()
 
             ComboBox8.Items.AddRange(MapperList.ToArray)
             ComboBox2.Items.AddRange(LayoutList.ToArray)
+            ComboBox10.Items.AddRange(MapperList.ToArray)
         End Sub
 
         Public Sub populateListOfMappers()
@@ -603,6 +609,8 @@ Namespace MapInfoDataDrivenPages
 
             Dim ZoomOrScaleString As String = ""
             Dim ZoomOrScale As Double
+            Dim frameWidth As Double = 0
+            Dim frameScale As Double = 0
 
             'move page number on 
             InteropServices.MapInfoApplication.Do("currentObject = MBR(" & tableName & ".obj)")
@@ -636,10 +644,24 @@ Namespace MapInfoDataDrivenPages
                             'todo
                     End Select
                 End If
-                'round
-                ZoomOrScale = Math.Floor(Math.Round(CDbl(ZoomOrScale) / NumericUpDown3.Value, 0)) * NumericUpDown3.Value
+                'round 
+                getMapperFrameInLayout(LayoutIDList(ComboBox2.SelectedIndex), MapperIDList(ComboBox8.SelectedIndex))
+                InteropServices.MapInfoApplication.Do("Set CoordSys Layout Units " & Chr(34) & Units & Chr(34))
+                frameWidth = InteropServices.MapInfoApplication.Eval("objectgeography(mainFrame,3) - objectgeography(mainFrame,1)")
+
+                'set coord system - based on mapper window. 
+                InteropServices.MapInfoApplication.Do("Dim coord As String")
+                InteropServices.MapInfoApplication.Do("coord = " & Chr(34) & "Set " & Chr(34) & " + mapperinfo(" & mapperID & ", 17)")
+                InteropServices.MapInfoApplication.Do("Run Command coord")
+                'frameScale = InteropServices.MapInfoApplication.Eval("mapperinfo(" & mapperID & ",1)") / frameWidth
+                frameScale = ZoomOrScale / frameWidth
+                'round frame scale
+                frameScale = Math.Floor(Math.Round(CDbl(frameScale) / NumericUpDown3.Value, 0)) * NumericUpDown3.Value
+                'convert back to zoom width
+                ZoomOrScale = frameWidth * CDbl(frameScale)
 
                 ZoomOrScaleString = " Zoom " & ZoomOrScale & " units " & Chr(34) & Units & Chr(34)
+
             Else
                 'map set by set scale 
                 If RadioButton2.Checked Then
@@ -647,16 +669,27 @@ Namespace MapInfoDataDrivenPages
                     ZoomOrScaleString = " Scale 1 for " & existingMapperScale
                 Else
                     'dynamic scale based on attribute column
-                    ZoomOrScaleString = " Scale 1 for " & InteropServices.MapInfoApplication.Eval(tableName & "." & ComboBox9.Text)
+                    'get frame and put in mainFrame
+                    getMapperFrameInLayout(LayoutIDList(ComboBox2.SelectedIndex), MapperIDList(ComboBox8.SelectedIndex))
+                    InteropServices.MapInfoApplication.Do("Set CoordSys Layout Units " & Chr(34) & Units & Chr(34))
+                    frameWidth = InteropServices.MapInfoApplication.Eval("objectgeography(mainFrame,3) - objectgeography(mainFrame,1)")
+                    InteropServices.MapInfoApplication.Do("Dim coord As String")
+                    InteropServices.MapInfoApplication.Do("coord = " & Chr(34) & "Set " & Chr(34) & " + mapperinfo(" & mapperID & ", 17)")
+                    InteropServices.MapInfoApplication.Do("Run Command coord")
+                    'set mapper width to produce correct layout scale (may need to set to map units ?)
+                    ZoomOrScale = frameWidth * CDbl(InteropServices.MapInfoApplication.Eval(tableName & "." & ComboBox9.Text))
+                    ZoomOrScaleString = " Zoom " & ZoomOrScale & " units " & Chr(34) & Units & Chr(34)
+
 
                 End If
             End If
 
 
-                'see: Changing the Current View of the Map 
-                InteropServices.MapInfoApplication.Do("Set Map window " & mapperID & " Center(" & minX + ((maxX - minX) / 2) & ", " & minY + ((maxY - minY) / 2) & ") " & ZoomOrScaleString)
+            'see: Changing the Current View of the Map 
+            InteropServices.MapInfoApplication.Do("Set Map window " & mapperID & " Center(" & minX + ((maxX - minX) / 2) & ", " & minY + ((maxY - minY) / 2) & ") " & ZoomOrScaleString)
 
-
+            'draw an extent indicator on an overview map
+            setupOverviewMapbox()
 
         End Sub
 
@@ -945,6 +978,28 @@ Namespace MapInfoDataDrivenPages
                 ' Begin writing.
                 writer.WriteStartDocument()
                 writer.WriteStartElement("DDP")
+
+                'write basic info
+                writer.WriteElementString("INDEXLAYER", ComboBox1.Text)
+                writer.WriteElementString("INDEXMAPPER", ComboBox8.Text)
+                writer.WriteElementString("INDEXLAYOUT", ComboBox2.Text)
+                writer.WriteElementString("INDEXNAME", ComboBox3.Text)
+                writer.WriteElementString("INDEXSORT", ComboBox4.Text)
+
+                writer.WriteElementString("MEBESTFIT", RadioButton1.Checked)
+                writer.WriteElementString("MEMAINTAIN", RadioButton2.Checked)
+                writer.WriteElementString("MEDDPSCALE", RadioButton3.Checked)
+
+                writer.WriteElementString("MEPOINTBUFFER", NumericUpDown1.Value)
+                writer.WriteElementString("MEPOLYBUFFER", NumericUpDown2.Value)
+                writer.WriteElementString("MESCALEROUND", NumericUpDown3.Value)
+
+                writer.WriteElementString("MEDDPCOL", ComboBox9.Text)
+
+                writer.WriteElementString("OVERVIEWMAPPER", ComboBox10.Text)
+                writer.WriteElementString("OVERVIEWCOLOUR", CD.Color.ToArgb)
+                writer.WriteElementString("OVERVIEWWIDTH", NumericUpDown5.Value)
+
                 'write page text xml
                 writer.WriteStartElement("PAGETEXT")
                 For i As Integer = 0 To pageTextPackedRowIdList.Count - 1
@@ -995,34 +1050,102 @@ Namespace MapInfoDataDrivenPages
             pageTextPackedRowIdList.Clear()
             pageTextPackedColumnHeaderList.Clear()
 
-            InteropServices.MapInfoApplication.Do("Fetch First From " & ComboBox1.Text)
-            For i As Integer = 1 To InteropServices.MapInfoApplication.Eval("tableinfo(" & LayoutN & " , 8)")
-                If InteropServices.MapInfoApplication.Eval("EOT(" & layoutName & ")") = "F" Then
-                    'is valid row
-                    'is it a dynamic row ?
-                    If isDynamicRow(i) Then
-                        pageTextPackedRowIdList.Add(validRowCount)
-                        pageTextPackedColumnHeaderList.Add(pageTextColumnHeaderList(i - 1))
-                    End If
-                    validRowCount = validRowCount + 1
-                Else
-                    'deleted row
-
+            InteropServices.MapInfoApplication.Do("Fetch first From " & LayoutN)
+            While InteropServices.MapInfoApplication.Eval("EOT(" & LayoutN & ")") = "F"
+                    'is it a dynamic row ?  
+                If isDynamicRow(InteropServices.MapInfoApplication.Eval(LayoutN & ".rowid")) <> -1 Then
+                    pageTextPackedRowIdList.Add(validRowCount)
+                    pageTextPackedColumnHeaderList.Add(pageTextColumnHeaderList(isDynamicRow(InteropServices.MapInfoApplication.Eval(LayoutN & ".rowid"))))
                 End If
-                InteropServices.MapInfoApplication.Do("Fetch Next From " & ComboBox1.Text)
-            Next
+                validRowCount = validRowCount + 1
+
+                InteropServices.MapInfoApplication.Do("Fetch next From " & LayoutN)
+            End While
 
         End Sub
 
-        Function isDynamicRow(ByVal rowNum As Integer) As Boolean
+        Function isDynamicRow(ByVal rowNum As Integer) As Integer
             'cycle through PageTextRowIdList and return value indicating if the row number in question is present
-            isDynamicRow = False
+            isDynamicRow = -1
             For x As Integer = 0 To pageTextRowIdList.Count - 1
+                'MsgBox("d row to compare to:" & pageTextRowIdList(x) & ", " & rowNum)
                 If pageTextRowIdList(x) = rowNum Then
-                    isDynamicRow = True
+                    isDynamicRow = x
                 End If
             Next
 
         End Function
+
+        Sub getMapperFrameInLayout(ByVal layoutID As String, ByVal mapperID As String)
+            'sets an object var in MB to the first frame with the mapper id linked
+
+            Dim LayoutN As String = InteropServices.MapInfoApplication.Eval("WindowInfo(" & layoutID & ", 10 )")
+
+
+            InteropServices.MapInfoApplication.Do("Fetch First From " & LayoutN)
+            For i As Integer = 1 To InteropServices.MapInfoApplication.Eval("tableinfo(" & LayoutN & " , 8)")
+                If InteropServices.MapInfoApplication.Eval("EOT(" & LayoutN & ")") = "F" Then
+                    If InteropServices.MapInfoApplication.Eval("objectinfo(" & LayoutN & ".obj,1)") = 6 Then
+                        'if its a frame (need to get its size in page units to get frame scale
+                        If InteropServices.MapInfoApplication.Eval("objectinfo(" & LayoutN & ".obj,4)") = mapperID Then
+                            'if it points to the chosen mapper
+                            'set as mainFrame object in MB
+                            InteropServices.MapInfoApplication.Do("dim mainFrame as object")
+                            InteropServices.MapInfoApplication.Do("mainFrame = " & LayoutN & ".obj")
+                        End If
+
+                    End If
+                End If
+                InteropServices.MapInfoApplication.Do("Fetch Next From " & LayoutN)
+            Next
+
+        End Sub
+
+
+        Sub setupOverviewMapbox()
+
+            If ComboBox10.Text = "" Then Exit Sub
+
+            Dim frameWidth, frameheight As String
+            Dim minX, maxX, minY, maxY As Double
+            Dim Units As String = InteropServices.MapInfoApplication.Eval("MapperInfo(" & MapperIDList(ComboBox10.SelectedIndex) & ", 11)")
+
+            'get frame in ayout and put in MB mainframe
+            getMapperFrameInLayout(LayoutIDList(ComboBox2.SelectedIndex), MapperIDList(ComboBox8.SelectedIndex))
+
+            'get frame dimensions
+            InteropServices.MapInfoApplication.Do("Set CoordSys Layout Units " & Chr(34) & Units & Chr(34))
+            frameWidth = InteropServices.MapInfoApplication.Eval("objectgeography(mainFrame,3) - objectgeography(mainFrame,1)")
+            frameheight = InteropServices.MapInfoApplication.Eval("objectgeography(mainFrame,4) - objectgeography(mainFrame,2)")
+            'set coord system - based on mapper window. 
+            InteropServices.MapInfoApplication.Do("Dim coord As String")
+            InteropServices.MapInfoApplication.Do("coord = " & Chr(34) & "Set " & Chr(34) & " + mapperinfo(" & MapperIDList(ComboBox10.SelectedIndex) & ", 17)")
+            InteropServices.MapInfoApplication.Do("Run Command coord")
+
+            'get viewport min/max x/y
+            'frame width represents mapper width, so min/max x can be taken directly from mapper extents
+            minX = InteropServices.MapInfoApplication.Eval("mapperinfo(" & MapperIDList(ComboBox8.SelectedIndex) & ",5)")
+            maxX = InteropServices.MapInfoApplication.Eval("mapperinfo(" & MapperIDList(ComboBox8.SelectedIndex) & ",7)")
+            maxY = InteropServices.MapInfoApplication.Eval("mapperinfo(" & MapperIDList(ComboBox8.SelectedIndex) & ",4)") + (((maxX - minX) * (frameheight / frameWidth)) / 2)
+            minY = InteropServices.MapInfoApplication.Eval("mapperinfo(" & MapperIDList(ComboBox8.SelectedIndex) & ",4)") - (((maxX - minX) * (frameheight / frameWidth)) / 2)
+
+            'delete all from cosmetic layer
+            Dim CosmeticN As String = InteropServices.MapInfoApplication.Eval("WindowInfo(" & MapperIDList(ComboBox10.SelectedIndex) & ", 10 )")
+            InteropServices.MapInfoApplication.Do("delete object from " & CosmeticN)
+
+            'set cosmetic layer editable
+            InteropServices.MapInfoApplication.Do("set map window " & MapperIDList(ComboBox10.SelectedIndex) & " layer 0 editable")
+
+            'draw new box on cosmetic layer
+            InteropServices.MapInfoApplication.Do("Create Pline Into Window " & MapperIDList(ComboBox10.SelectedIndex) & "  Multiple 1 5 ( " & minX & "," & minY & ") (" & minX & "," & maxY & " ) (" & maxX & ", " & maxY & " ) (" & maxX & ", " & minY & " )( " & minX & ", " & minY & ") Pen makepen(" & NumericUpDown5.Value & ", 2, " & InteropServices.MapInfoApplication.Eval("RGB(" & CD.Color.R & "," & CD.Color.G & "," & CD.Color.B & ")") & " )")
+
+
+        End Sub
+
+
+        Private Sub Button10_Click(sender As Object, e As EventArgs) Handles Button10.Click
+            CD.ShowDialog()
+            Panel1.BackColor = CD.Color
+        End Sub
     End Class
 End Namespace

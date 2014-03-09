@@ -45,6 +45,12 @@ Namespace MapInfoDataDrivenPages
             Me.Label1 = New System.Windows.Forms.Label()
             Me.Label2 = New System.Windows.Forms.Label()
             Me.TabPage2 = New System.Windows.Forms.TabPage()
+            Me.GroupBox7 = New System.Windows.Forms.GroupBox()
+            Me.Panel1 = New System.Windows.Forms.Panel()
+            Me.Button10 = New System.Windows.Forms.Button()
+            Me.Label14 = New System.Windows.Forms.Label()
+            Me.NumericUpDown5 = New System.Windows.Forms.NumericUpDown()
+            Me.ComboBox10 = New System.Windows.Forms.ComboBox()
             Me.GroupBox1 = New System.Windows.Forms.GroupBox()
             Me.Button6 = New System.Windows.Forms.Button()
             Me.ComboBox9 = New System.Windows.Forms.ComboBox()
@@ -95,9 +101,7 @@ Namespace MapInfoDataDrivenPages
             Me.ToolStripButton7 = New System.Windows.Forms.ToolStripButton()
             Me.ToolStripSeparator2 = New System.Windows.Forms.ToolStripSeparator()
             Me.ToolStripDropDownButton1 = New System.Windows.Forms.ToolStripDropDownButton()
-            Me.GroupBox7 = New System.Windows.Forms.GroupBox()
-            Me.Button10 = New System.Windows.Forms.Button()
-            Me.ComboBox10 = New System.Windows.Forms.ComboBox()
+            Me.CheckBox1 = New System.Windows.Forms.CheckBox()
             Me.ToolStripContainer1.ContentPanel.SuspendLayout()
             Me.ToolStripContainer1.TopToolStripPanel.SuspendLayout()
             Me.ToolStripContainer1.SuspendLayout()
@@ -105,6 +109,8 @@ Namespace MapInfoDataDrivenPages
             Me.TabPage1.SuspendLayout()
             Me.GroupBox2.SuspendLayout()
             Me.TabPage2.SuspendLayout()
+            Me.GroupBox7.SuspendLayout()
+            CType(Me.NumericUpDown5, System.ComponentModel.ISupportInitialize).BeginInit()
             Me.GroupBox1.SuspendLayout()
             CType(Me.NumericUpDown3, System.ComponentModel.ISupportInitialize).BeginInit()
             Me.GroupBox3.SuspendLayout()
@@ -118,7 +124,6 @@ Namespace MapInfoDataDrivenPages
             Me.GroupBox4.SuspendLayout()
             CType(Me.NumericUpDown4, System.ComponentModel.ISupportInitialize).BeginInit()
             Me.ToolStrip1.SuspendLayout()
-            Me.GroupBox7.SuspendLayout()
             Me.SuspendLayout()
             '
             'ToolStripContainer1
@@ -258,6 +263,50 @@ Namespace MapInfoDataDrivenPages
             resources.ApplyResources(Me.TabPage2, "TabPage2")
             Me.TabPage2.Name = "TabPage2"
             Me.TabPage2.UseVisualStyleBackColor = True
+            '
+            'GroupBox7
+            '
+            Me.GroupBox7.Controls.Add(Me.Panel1)
+            Me.GroupBox7.Controls.Add(Me.Button10)
+            Me.GroupBox7.Controls.Add(Me.Label14)
+            Me.GroupBox7.Controls.Add(Me.NumericUpDown5)
+            Me.GroupBox7.Controls.Add(Me.ComboBox10)
+            resources.ApplyResources(Me.GroupBox7, "GroupBox7")
+            Me.GroupBox7.Name = "GroupBox7"
+            Me.GroupBox7.TabStop = False
+            '
+            'Panel1
+            '
+            Me.Panel1.BackColor = System.Drawing.Color.Red
+            resources.ApplyResources(Me.Panel1, "Panel1")
+            Me.Panel1.Name = "Panel1"
+            '
+            'Button10
+            '
+            Me.Button10.BackColor = System.Drawing.Color.Transparent
+            resources.ApplyResources(Me.Button10, "Button10")
+            Me.Button10.Name = "Button10"
+            Me.Button10.UseVisualStyleBackColor = False
+            '
+            'Label14
+            '
+            resources.ApplyResources(Me.Label14, "Label14")
+            Me.Label14.Name = "Label14"
+            '
+            'NumericUpDown5
+            '
+            resources.ApplyResources(Me.NumericUpDown5, "NumericUpDown5")
+            Me.NumericUpDown5.Maximum = New Decimal(New Integer() {10, 0, 0, 0})
+            Me.NumericUpDown5.Minimum = New Decimal(New Integer() {1, 0, 0, 0})
+            Me.NumericUpDown5.Name = "NumericUpDown5"
+            Me.NumericUpDown5.Value = New Decimal(New Integer() {1, 0, 0, 0})
+            '
+            'ComboBox10
+            '
+            Me.ComboBox10.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+            Me.ComboBox10.FormattingEnabled = True
+            resources.ApplyResources(Me.ComboBox10, "ComboBox10")
+            Me.ComboBox10.Name = "ComboBox10"
             '
             'GroupBox1
             '
@@ -468,6 +517,7 @@ Namespace MapInfoDataDrivenPages
             '
             'GroupBox4
             '
+            Me.GroupBox4.Controls.Add(Me.CheckBox1)
             Me.GroupBox4.Controls.Add(Me.ProgressBar1)
             Me.GroupBox4.Controls.Add(Me.Button5)
             Me.GroupBox4.Controls.Add(Me.TextBox1)
@@ -603,26 +653,11 @@ Namespace MapInfoDataDrivenPages
             Me.ToolStripDropDownButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text
             Me.ToolStripDropDownButton1.Name = "ToolStripDropDownButton1"
             '
-            'GroupBox7
+            'CheckBox1
             '
-            Me.GroupBox7.Controls.Add(Me.Button10)
-            Me.GroupBox7.Controls.Add(Me.ComboBox10)
-            resources.ApplyResources(Me.GroupBox7, "GroupBox7")
-            Me.GroupBox7.Name = "GroupBox7"
-            Me.GroupBox7.TabStop = False
-            '
-            'Button10
-            '
-            resources.ApplyResources(Me.Button10, "Button10")
-            Me.Button10.Name = "Button10"
-            Me.Button10.UseVisualStyleBackColor = True
-            '
-            'ComboBox10
-            '
-            Me.ComboBox10.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
-            Me.ComboBox10.FormattingEnabled = True
-            resources.ApplyResources(Me.ComboBox10, "ComboBox10")
-            Me.ComboBox10.Name = "ComboBox10"
+            resources.ApplyResources(Me.CheckBox1, "CheckBox1")
+            Me.CheckBox1.Name = "CheckBox1"
+            Me.CheckBox1.UseVisualStyleBackColor = True
             '
             'Dlg
             '
@@ -641,6 +676,9 @@ Namespace MapInfoDataDrivenPages
             Me.GroupBox2.ResumeLayout(False)
             Me.GroupBox2.PerformLayout()
             Me.TabPage2.ResumeLayout(False)
+            Me.GroupBox7.ResumeLayout(False)
+            Me.GroupBox7.PerformLayout()
+            CType(Me.NumericUpDown5, System.ComponentModel.ISupportInitialize).EndInit()
             Me.GroupBox1.ResumeLayout(False)
             Me.GroupBox1.PerformLayout()
             CType(Me.NumericUpDown3, System.ComponentModel.ISupportInitialize).EndInit()
@@ -659,7 +697,6 @@ Namespace MapInfoDataDrivenPages
             CType(Me.NumericUpDown4, System.ComponentModel.ISupportInitialize).EndInit()
             Me.ToolStrip1.ResumeLayout(False)
             Me.ToolStrip1.PerformLayout()
-            Me.GroupBox7.ResumeLayout(False)
             Me.ResumeLayout(False)
 
         End Sub
@@ -732,8 +769,12 @@ Namespace MapInfoDataDrivenPages
         Friend WithEvents Label12 As System.Windows.Forms.Label
         Friend WithEvents Button9 As System.Windows.Forms.Button
         Friend WithEvents GroupBox7 As System.Windows.Forms.GroupBox
-        Friend WithEvents Button10 As System.Windows.Forms.Button
         Friend WithEvents ComboBox10 As System.Windows.Forms.ComboBox
+        Friend WithEvents Panel1 As System.Windows.Forms.Panel
+        Friend WithEvents Button10 As System.Windows.Forms.Button
+        Friend WithEvents Label14 As System.Windows.Forms.Label
+        Friend WithEvents NumericUpDown5 As System.Windows.Forms.NumericUpDown
+        Friend WithEvents CheckBox1 As System.Windows.Forms.CheckBox
 
 #End Region
 

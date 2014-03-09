@@ -79,11 +79,14 @@ declare function UnregisterAllByOwner lib "tooltabl.dll" (byval owner as string)
 Global window_id As Integer   ' Window ID of current (map) window 
 Global PI as float 
 'Global tempString as string 'used in .net
-
+Global mainFrame as object
+Global OverviewOutline as pen
 
    
 Sub Main
 	PI = 3.14159265359
+	
+	OverviewOutline = MakePen(1, 2, 16711680)
 	
   OnError Goto HandleError
   ' Assign some global variables, so that the Auto-Load button 
