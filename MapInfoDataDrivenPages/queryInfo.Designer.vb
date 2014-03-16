@@ -36,6 +36,7 @@ Partial Class queryInfo
         Me.ToolStripSeparator1 = New System.Windows.Forms.ToolStripSeparator()
         Me.ToolStripButton2 = New System.Windows.Forms.ToolStripDropDownButton()
         Me.GroupBox1 = New System.Windows.Forms.GroupBox()
+        Me.Label3 = New System.Windows.Forms.Label()
         Me.Panel1.SuspendLayout()
         Me.ToolStripContainer1.ContentPanel.SuspendLayout()
         Me.ToolStripContainer1.TopToolStripPanel.SuspendLayout()
@@ -82,7 +83,7 @@ Partial Class queryInfo
         '
         'Button1
         '
-        Me.Button1.Location = New System.Drawing.Point(246, 223)
+        Me.Button1.Location = New System.Drawing.Point(249, 280)
         Me.Button1.Name = "Button1"
         Me.Button1.Size = New System.Drawing.Size(75, 23)
         Me.Button1.TabIndex = 4
@@ -91,7 +92,7 @@ Partial Class queryInfo
         '
         'Button2
         '
-        Me.Button2.Location = New System.Drawing.Point(165, 223)
+        Me.Button2.Location = New System.Drawing.Point(168, 280)
         Me.Button2.Name = "Button2"
         Me.Button2.Size = New System.Drawing.Size(75, 23)
         Me.Button2.TabIndex = 5
@@ -172,11 +173,22 @@ Partial Class queryInfo
         Me.GroupBox1.TabStop = False
         Me.GroupBox1.Text = "Query"
         '
+        'Label3
+        '
+        Me.Label3.AutoSize = True
+        Me.Label3.Location = New System.Drawing.Point(12, 220)
+        Me.Label3.Name = "Label3"
+        Me.Label3.Size = New System.Drawing.Size(253, 52)
+        Me.Label3.TabIndex = 8
+        Me.Label3.Text = "this query will be run for each data driven page.  " & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "The result of the query will" & _
+    " be added to the mapper," & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "It is dynamic, the results are removed and re-created" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "for each page."
+        '
         'queryInfo
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(336, 260)
+        Me.ClientSize = New System.Drawing.Size(336, 315)
+        Me.Controls.Add(Me.Label3)
         Me.Controls.Add(Me.GroupBox1)
         Me.Controls.Add(Me.Button2)
         Me.Controls.Add(Me.Button1)
@@ -197,6 +209,7 @@ Partial Class queryInfo
         Me.GroupBox1.ResumeLayout(False)
         Me.GroupBox1.PerformLayout()
         Me.ResumeLayout(False)
+        Me.PerformLayout()
 
     End Sub
     Friend WithEvents ComboBox1 As System.Windows.Forms.ComboBox
@@ -212,4 +225,5 @@ Partial Class queryInfo
     Friend WithEvents ToolStripButton1 As System.Windows.Forms.ToolStripDropDownButton
     Friend WithEvents ToolStripButton2 As System.Windows.Forms.ToolStripDropDownButton
     Friend WithEvents GroupBox1 As System.Windows.Forms.GroupBox
+    Friend WithEvents Label3 As System.Windows.Forms.Label
 End Class

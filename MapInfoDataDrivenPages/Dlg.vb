@@ -15,6 +15,15 @@ Imports MapInfo.MiPro.Interop
 Imports System.Text.RegularExpressions
 Imports System.Windows.Forms.DataVisualization.Charting
 Imports System.Drawing.Printing
+Imports System.Drawing.Drawing2D
+Imports System.Drawing.Imaging
+Imports System.Collections
+Imports System.ComponentModel
+Imports System.Data
+Imports System.Xml.Linq
+Imports System.Linq
+
+
 
 
 
@@ -88,6 +97,13 @@ Namespace MapInfoDataDrivenPages
         Public Shared zIntervalList As New List(Of Double)
         Public Shared ELEVarray As New List(Of Double)
 
+        Dim exportType As Integer '1 for image, 2 for print , 3 for multi tif
+        Dim tiffarray() As Bitmap
+
+        Dim windowColour As Color
+        Dim validRows As Integer
+
+
 
 
 
@@ -103,6 +119,7 @@ Namespace MapInfoDataDrivenPages
             'ComboBox10.Text = "mm" ' layout units for layout buffer
             NumericUpDown1.Value = 125
             NumericUpDown2.Value = 125
+            ComboBox5.SelectedIndex = 0
             ComboBox6.SelectedIndex = 0
 
             'check for blank file used in search operations - this is used as a flag to see if OSTools has been installed, if not it is autoregestered by the MBX
@@ -135,6 +152,8 @@ Namespace MapInfoDataDrivenPages
         Private Sub NViewDlg_Load(ByVal sender As Object, ByVal e As EventArgs) Handles MyBase.Load
             CreateBlank()
             InteropHelper.theDlg = Me
+            windowColour = ComboBox1.BackColor
+            refreshDDP()
             If firstLoad = True Then
                 firstLoad = False
 
@@ -215,6 +234,10 @@ Namespace MapInfoDataDrivenPages
         End Sub
 
         Private Sub Button4_Click(sender As Object, e As EventArgs) Handles Button4.Click
+            refreshDDP()
+        End Sub
+
+        Sub refreshDDP()
             populateListofIndexLayers()
             resetMapperAndLayoutPickers()
             resetSetupFields()
@@ -234,7 +257,42 @@ Namespace MapInfoDataDrivenPages
             pageDrivenQueryListSub.Clear()
             pageDrivenQueryTables.Clear()
 
+            DataGridView1.Rows.Clear()
+
             CD.Color = Color.Red
+
+            'set combo box colors to none
+            ComboBox1.Enabled = True
+            ComboBox8.Enabled = True
+            ComboBox2.Enabled = True
+
+            'auto fill combo boxes if data availble - show red if error
+            'index layer
+            If ComboBox1.Items.Count > 0 Then
+                ComboBox1.SelectedIndex = 0
+            Else
+                ComboBox1.Items.Add("No Vaild Index Layers open")
+                ComboBox1.SelectedIndex = 0
+                ComboBox1.Enabled = False
+            End If
+
+            'mapper layer
+            If ComboBox8.Items.Count > 0 Then
+                ComboBox8.SelectedIndex = 0
+            Else
+                ComboBox8.Items.Add("No Vaild Mappers open")
+                ComboBox8.SelectedIndex = 0
+                ComboBox8.Enabled = False
+            End If
+
+            'layout layer
+            If ComboBox2.Items.Count > 0 Then
+                ComboBox2.SelectedIndex = 0
+            Else
+                ComboBox2.Items.Add("No Vaild Layouts open")
+                ComboBox2.SelectedIndex = 0
+                ComboBox2.Enabled = False
+            End If
         End Sub
 
         Sub resetSetupFields()
@@ -348,7 +406,9 @@ Namespace MapInfoDataDrivenPages
             ComboBox9.Items.AddRange(ColumnList.ToArray)
 
             'add list of columns to page text 
-            'TODO - also add object information posibilities e.g area, length, scale
+            'TODO: - also add object information posibilities e.g area, length, scale
+
+
             ToolStripDropDownButton1.DropDownItems.Clear()
             For x As Integer = 0 To ColumnList.Count - 1
                 ToolStripDropDownButton1.DropDownItems.Add(ColumnList(x))
@@ -422,20 +482,50 @@ Namespace MapInfoDataDrivenPages
             Dim numRec As String = numberOfRecords(tableNameOrID)
             Label10.Text = numRec & " Features"
 
-            ToolStripComboBox1.Items.AddRange(pageList.ToArray)
+            'check for unpacked table (must be first - i.e. can't check for objectless rows before packing)
+            If numRec <> InteropServices.MapInfoApplication.Eval("tableinfo(" & tableNameOrID & ", 8)") Then
+                Dim PT As New PackTable
+                PT.Label4.Text = ComboBox1.Text
 
+                PT.Label7.Text = InteropServices.MapInfoApplication.Eval("tableinfo(" & tableNameOrID & ", 8)")
+                PT.Label8.Text = InteropServices.MapInfoApplication.Eval("tableinfo(" & tableNameOrID & ", 8)") - numRec
+                PT.ShowDialog()
+            End If
+
+            'check for rows without objects
+            If validRows <> InteropServices.MapInfoApplication.Eval("tableinfo(" & tableNameOrID & ", 8)") Then
+                Dim ObLessRows As New ObjectlessRows
+                ObLessRows.Label4.Text = ComboBox1.Text
+
+                ObLessRows.Label7.Text = numRec
+                ObLessRows.Label8.Text = validRows
+                ObLessRows.ShowDialog()
+            End If
+
+            ToolStripComboBox1.Items.Clear()
+            CheckedListBox1.Items.Clear()
+            ToolStripComboBox1.Items.AddRange(pageList.ToArray)
+            CheckedListBox1.Items.AddRange(pageList.ToArray)
         End Sub
 
         Function numberOfRecords(ByVal tableName As String) As Integer
             'fetch only understands tablename
             If IsNumeric(tableName) Then tableName = InteropServices.MapInfoApplication.Eval("tableinfo(" & tableName & ", 1)") ' 1=table name
 
+            validRows = 0
             Dim i As Integer = 0
+            Dim tempValue As String = ""
             InteropServices.MapInfoApplication.Do("Fetch First From " & tableName)
             While InteropServices.MapInfoApplication.Eval("EOT(" & tableName & ")") = "F"
-                If InteropServices.MapInfoApplication.Eval("objectinfo(" & tableName & ".obj, 11)") = "T" Then i = i + 1 '11=OBJ_INFO_NONEMPTY   |||  MI only returns strings
-                InteropServices.MapInfoApplication.Do("Fetch Next From " & tableName)
+                tempValue = InteropServices.MapInfoApplication.Eval("objectinfo(" & tableName & ".obj, 1)")
+                If tempValue = 1 Or tempValue = 2 Or tempValue = 3 Or tempValue = 4 Or tempValue = 5 Or tempValue = 6 Or tempValue = 7 Or tempValue = 8 Or tempValue = 9 Then
+                    validRows = validRows + 1
+                End If
+                i = i + 1 '11=OBJ_INFO_NONEMPTY   |||  MI only returns strings
                 pageList.Add(i)
+                'End If
+                InteropServices.MapInfoApplication.Do("Fetch Next From " & tableName)
+
             End While
 
             Return i
@@ -448,7 +538,7 @@ Namespace MapInfoDataDrivenPages
             Dim i As Integer = 0
             InteropServices.MapInfoApplication.Do("Fetch First From " & tableName)
             While InteropServices.MapInfoApplication.Eval("EOT(" & tableName & ")") = "F"
-                If InteropServices.MapInfoApplication.Eval("objectinfo(" & tableName & ".obj, 11)") = "T" Then Return True '11=OBJ_INFO_NONEMPTY   |||  MI only returns strings
+                If InteropServices.MapInfoApplication.Eval("objectinfo(" & tableName & ".obj, 1)") <> 10 Then Return True '11=OBJ_INFO_NONEMPTY   |||  MI only returns strings
                 InteropServices.MapInfoApplication.Do("Fetch Next From " & tableName)
             End While
 
@@ -464,10 +554,13 @@ Namespace MapInfoDataDrivenPages
             'do this by checking total rows against rows with object data
             'TODO:see above
 
-            populateListofColumnsFromLayer(ComboBox1.Text)
-            resetColumnSetupFields()
-            setupRecordNumbers(ComboBox1.Text)
-            ToolStripComboBox1.SelectedIndex = 0
+            If ComboBox1.Text <> "No Vaild Index Layers open" Then
+                populateListofColumnsFromLayer(ComboBox1.Text)
+                resetColumnSetupFields()
+                setupRecordNumbers(ComboBox1.Text)
+                ToolStripComboBox1.SelectedIndex = 0
+                pageSelectAll()
+            End If
         End Sub
 
 
@@ -477,6 +570,13 @@ Namespace MapInfoDataDrivenPages
 
 
         Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
+
+            If CheckBox1.Checked Then
+                exportType = 3
+            Else
+                exportType = 1
+            End If
+
             ExportToImages()
         End Sub
 
@@ -485,6 +585,23 @@ Namespace MapInfoDataDrivenPages
         End Sub
 
         Public Sub cycleThroughFeatures()
+
+            'set up vars for multi page tif
+            Dim MasterBitmap As Bitmap
+            Dim currentImage As Image
+            Dim encoder As Encoder = encoder.SaveFlag
+            Dim info As ImageCodecInfo = Nothing
+
+            Dim iCodecInfo As ImageCodecInfo
+            For Each iCodecInfo In ImageCodecInfo.GetImageEncoders()
+                If iCodecInfo.MimeType = "image/tiff" Then
+                    info = iCodecInfo
+                End If
+            Next iCodecInfo
+            Dim ep As New EncoderParameters(1)
+            ep.Param(0) = New EncoderParameter(encoder, CLng(EncoderValue.MultiFrame))
+
+
 
             'set up MI dim for MBR object (.net cannot accept this
             InteropServices.MapInfoApplication.Do("dim currentObject as object")
@@ -538,48 +655,119 @@ Namespace MapInfoDataDrivenPages
                 pageWidth = layoutPageSize.Height
             End If
 
+            'set up counter
             Dim i As Integer = 1
+
+            'output name column
+            Dim nameColumn As String
+            If ComboBox3.Text <> "" Then
+                'if a name column is selected
+                'are values unique (if not the files will override themselfs as the pages are exported)
+                If areColumnValuesUnique(ComboBox3.Text) Then
+                    nameColumn = ComboBox3.Text
+                Else
+                    nameColumn = "rowid"
+                End If
+
+
+            Else
+                'if no name column selected default to row id .  i.e. 1,2,3,4 etc...
+                nameColumn = "rowid"
+            End If
+
+            'set up progress bars
+            ProgressBar1.Maximum = CheckedListBox1.CheckedItems.Count
+            ProgressBar2.Maximum = CheckedListBox1.CheckedItems.Count
+
+
             'for each feature
             'get feature MBR and zoom to it
+            Dim tempValue As String = ""
+            tempValue = InteropServices.MapInfoApplication.Eval("objectinfo(" & tableName & ".obj, 1)")
+
             InteropServices.MapInfoApplication.Do("Fetch First From " & tableName)
             While InteropServices.MapInfoApplication.Eval("EOT(" & tableName & ")") = "F"
                 'check if valid object (not all rows may have an object attached to them
-                If InteropServices.MapInfoApplication.Eval("objectinfo(" & tableName & ".obj, 11)") = "T" Then
+                'If tempValue = 1 Or tempValue = 2 Or tempValue = 3 Or tempValue = 4 Or tempValue = 5 Or tempValue = 6 Or tempValue = 7 Or tempValue = 8 Or tempValue = 9 Then
+
+                If CheckedListBox1.GetItemChecked(i - 1) Then
 
                     'move page number on 
                     'this will trigger pagetext update
                     If ToolStripComboBox1.SelectedIndex + 1 <> ToolStripComboBox1.Items.Count And i > 1 Then
-                        ToolStripComboBox1.SelectedIndex = ToolStripComboBox1.SelectedIndex + 1
+                        ToolStripComboBox1.SelectedIndex = i - 1 'ToolStripComboBox1.SelectedIndex + 1
                     End If
 
+                    'NOW MOVED TO MOVE EXTENT''''''''''''''''''''''''''''''
                     'execute any page driven queries
-                    If pageDrivenQueryList.Count > 0 Then
-                        'place index page values into query
-                        substituteIndexValues()
+                    'If pageDrivenQueryList.Count > 0 Then
+                    'place index page values into query
+                    'substituteIndexValues()
 
-                        'run queries
-                        executeQueries()
-                    End If
-
-
-                End If
-                'requires re-seting after updatePageText
-                InteropServices.MapInfoApplication.Do("Fetch Rec " & i & " From " & tableName)
+                    'run queries
+                    'executeQueries()
+                    'End If
+                    '''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 
-                'export chosen layout to image
-                exportJPG(layoutID, Path.Combine(TextBox1.Text, InteropServices.MapInfoApplication.Eval(tableName & "." & ComboBox3.Text)), pageWidth, pageHeight)
-                i = i + 1
+                    'requires re-seting after updatePageText
+                    'InteropServices.MapInfoApplication.Do("Fetch Rec " & i & " From " & tableName)
 
-                'remove queries after export
-                If pageDrivenQueryList.Count > 0 Then
-                    removeQueries()
+                    Select Case exportType
+                        Case 1
+                            'export chosen layout to image
+                            exportJPG(layoutID, Path.Combine(TextBox1.Text, InteropServices.MapInfoApplication.Eval(tableName & "." & nameColumn)), pageWidth, pageHeight)
+                            ProgressBar1.Value = i
+                            i = i + 1
+                        Case 2
+                            'send to printer
+                            InteropServices.MapInfoApplication.Do("PrintWin  Window " & layoutID)
+                            ProgressBar2.Value = i
+                            i = i + 1
+                        Case 3
+                            'multipage tif
+                            exportJPG(layoutID, Path.Combine(TextBox1.Text, InteropServices.MapInfoApplication.Eval(tableName & "." & nameColumn)), pageWidth, pageHeight)
+
+                            'if first image
+                            If IsNothing(MasterBitmap) Then
+                                'master image
+                                MasterBitmap = Bitmap.FromFile(Path.Combine(TextBox1.Text, InteropServices.MapInfoApplication.Eval(tableName & "." & nameColumn) & ".tif"))
+                                MasterBitmap.Save(Path.Combine(TextBox1.Text, "multiPageTiff.tif"), info, ep)
+                                ep.Param(0) = New EncoderParameter(encoder, CLng(EncoderValue.FrameDimensionPage))
+                            Else
+                                'other image
+                                currentImage = CType(Bitmap.FromFile(Path.Combine(TextBox1.Text, InteropServices.MapInfoApplication.Eval(tableName & "." & nameColumn) & ".tif")), Image)
+                                MasterBitmap.SaveAdd(currentImage, ep)
+
+                            End If
+
+                            'delete original
+                            'File.Delete(Path.Combine(TextBox1.Text, InteropServices.MapInfoApplication.Eval(tableName & "." & nameColumn) & ".tif"))
+
+                            ProgressBar1.Value = i
+
+                            i = i + 1
+                    End Select
+
+                    'NOW MOVED TO MOVE EXTENT'''''''''''''''''''''''''''''
+                    'remove queries after export
+                    ' If pageDrivenQueryList.Count > 0 Then
+                    'removeQueries()
+                    'End If
+                    ''''''''''''''''''''''''''''''''''''''''''''''''''''''
+                Else
+                    i = i + 1
                 End If
 
                 InteropServices.MapInfoApplication.Do("Fetch Next From " & tableName)
             End While
 
-
+            If exportType = 3 Then
+                'if multipage tiff -  finish
+                ep.Param(0) = New EncoderParameter(encoder, CLng(EncoderValue.Flush))
+                'close out the file.
+                MasterBitmap.SaveAdd(ep)
+            End If
 
 
 
@@ -589,6 +777,11 @@ Namespace MapInfoDataDrivenPages
 
 
         Sub moveExtent()
+            'remove queries 
+            If pageDrivenQueryList.Count > 0 And pageDrivenQueryTables.Count > 0 Then
+                removeQueries()
+            End If
+
             'set up MI dim for MBR object (.net cannot accept this
             InteropServices.MapInfoApplication.Do("dim currentObject as object")
 
@@ -597,7 +790,7 @@ Namespace MapInfoDataDrivenPages
 
             'get selected index table
             Dim tableName As String = ComboBox1.Text
-            Dim mapperID As Integer = MapperIDList(ComboBox1.SelectedIndex)
+            Dim mapperID As Integer = MapperIDList(ComboBox8.SelectedIndex)
             'get selected layout name
             Dim layoutName As String = ComboBox2.Text
             Dim layoutID As Integer = LayoutIDList(ComboBox2.SelectedIndex)
@@ -691,6 +884,15 @@ Namespace MapInfoDataDrivenPages
             'draw an extent indicator on an overview map
             setupOverviewMapbox()
 
+            'execute any page driven queries
+            If pageDrivenQueryList.Count > 0 Then
+                'place index page values into query
+                substituteIndexValues()
+
+                'run queries
+                executeQueries()
+            End If
+
         End Sub
 
 
@@ -721,9 +923,15 @@ Namespace MapInfoDataDrivenPages
             TabControl1.SelectedIndex = 2
         End Sub
 
-        Private Sub ToolStripButton2_Click(sender As Object, e As EventArgs) Handles ToolStripButton2.Click
-
+        Private Sub Button11_Click(sender As Object, e As EventArgs) Handles Button11.Click
+            TabControl1.SelectedIndex = 3
         End Sub
+
+        Private Sub ToolStripButton2_Click(sender As Object, e As EventArgs) Handles ToolStripButton2.Click
+            refreshDDP()
+            loadXML()
+        End Sub
+
 
         Private Sub ToolStripDropDownButton1_Click(sender As Object, e As EventArgs) Handles ToolStripDropDownButton1.Click
 
@@ -810,8 +1018,71 @@ Namespace MapInfoDataDrivenPages
         End Sub
 
         Sub loadXML()
-            'find the xml file and load its contents into "pageText"
+            'reset page text
+            pageTextRowIdList.Clear()
+            pageTextColumnHeaderList.Clear()
 
+            'reset queries
+            pageDrivenQueryList.Clear()
+            DataGridView1.Rows.Clear()
+            pageDrivenQueryForms.Clear()
+
+            'find the xml file and load its contents into "pageText"
+            Dim OFD As New OpenFileDialog
+            OFD.Filter = "DDP xml files (*.ddp)|*.DDP"
+            OFD.Title = "Pick a saved Data driven pages file"
+            OFD.ShowDialog()
+
+            'load xml
+            Dim DDP As XDocument = XDocument.Load(OFD.FileName)
+            'Dim DDP As XDocument = theFile...<DDP>
+
+            ComboBox1.Text = DDP.<DDP>.<INDEXLAYER>.Value
+            ComboBox8.Text = DDP.<DDP>.<INDEXMAPPER>.Value
+            ComboBox2.Text = DDP.<DDP>.<INDEXLAYOUT>.Value
+            ComboBox3.Text = DDP.<DDP>.<INDEXNAME>.Value
+            ComboBox4.Text = DDP.<DDP>.<INDEXSORT>.Value
+
+            RadioButton1.Checked = CBool(DDP.<DDP>.<MEBESTFIT>.Value)
+            RadioButton2.Checked = CBool(DDP.<DDP>.<MEMAINTAIN>.Value)
+            RadioButton3.Checked = CBool(DDP.<DDP>.<MEDDPSCALE>.Value)
+
+            NumericUpDown1.Value = DDP.<DDP>.<MEPOINTBUFFER>.Value
+            NumericUpDown2.Value = DDP.<DDP>.<MEPOLYBUFFER>.Value
+            NumericUpDown3.Value = DDP.<DDP>.<MESCALEROUND>.Value
+
+            ComboBox10.Text = DDP.<DDP>.<OVERVIEWMAPPER>.Value
+            Panel1.BackColor = ColorTranslator.FromHtml(DDP.<DDP>.<OVERVIEWCOLOUR>.Value)
+            NumericUpDown5.Value = DDP.<DDP>.<OVERVIEWWIDTH>.Value
+
+            'page text
+            Dim allTEXT As System.Collections.Generic.IEnumerable(Of System.Xml.Linq.XElement) = DDP.<DDP>.<PAGETEXT>.<TEXT>
+            For Each pageTextItem As System.Xml.Linq.XElement In allTEXT
+                pageTextRowIdList.Add(pageTextItem.<ROWID>.Value)
+                pageTextColumnHeaderList.Add(pageTextItem.<COLNAME>.Value)
+            Next
+
+            'ddp queries
+            Dim QI As New queryInfo
+            Dim allQUERIES As System.Collections.Generic.IEnumerable(Of System.Xml.Linq.XElement) = DDP.<DDP>.<PAGEQUERIES>.<QUERY>
+            For Each pageQItem As System.Xml.Linq.XElement In allQUERIES
+                DataGridView1.Rows.Add()
+                DataGridView1.Rows.Item(DataGridView1.Rows.Count - 1).Cells(0).Value = pageQItem.<QUERYID>.Value
+                DataGridView1.Rows.Item(DataGridView1.Rows.Count - 1).Cells(1).Value = pageQItem.<QUERYLAYER>.Value
+                pageDrivenQueryList.Add(pageQItem.<QUERYDEF>.Value)
+
+                QI = New queryInfo
+                QI.ComboBox1.Items.AddRange(tableNames.ToArray)
+                QI.ComboBox1.Text = pageQItem.<QUERYLAYER>.Value
+
+                'add table name to box to allow query of columns
+                QI.tablename = ComboBox1.Text
+                QI.TextBox1.Text = pageQItem.<QUERYDEF>.Value
+                QI.setPageColumns()
+
+                MapInfoDataDrivenPages.InteropHelper.theDlg.pageDrivenQueryForms.Add(QI)
+
+            Next
 
         End Sub
 
@@ -829,7 +1100,7 @@ Namespace MapInfoDataDrivenPages
 
                 'get selected index table
                 Dim tableName As String = ComboBox1.Text
-                Dim mapperID As Integer = MapperIDList(ComboBox1.SelectedIndex)
+                Dim mapperID As Integer = MapperIDList(ComboBox8.SelectedIndex)
 
                 'must set coordinate system based on map options - see profile tool
                 'set coord system - based on mapper window. 
@@ -893,12 +1164,14 @@ Namespace MapInfoDataDrivenPages
 
                 'excute query and place into rand
                 pageDrivenQueryTables.Add(RandomClass.Next(1000000, 9999999))
-                MsgBox("Select * from " & MapInfoDataDrivenPages.InteropHelper.theDlg.DataGridView1.Rows.Item(i).Cells(1).Value & " where " & pageDrivenQueryListSub(i) & " into _" & pageDrivenQueryTables(i))
+                'MsgBox("Select * from " & MapInfoDataDrivenPages.InteropHelper.theDlg.DataGridView1.Rows.Item(i).Cells(1).Value & " where " & pageDrivenQueryListSub(i) & " into _" & pageDrivenQueryTables(i))
                 InteropServices.MapInfoApplication.Do("Select * from " & MapInfoDataDrivenPages.InteropHelper.theDlg.DataGridView1.Rows.Item(i).Cells(1).Value & " where " & pageDrivenQueryListSub(i) & " into _" & pageDrivenQueryTables(i))
 
                 'add to mapper
                 InteropServices.MapInfoApplication.Do("Add Map Window " & MapperIDList(ComboBox8.SelectedIndex) & " Auto Layer _" & pageDrivenQueryTables(i))
 
+                'disable to prevent medeling
+                InteropServices.MapInfoApplication.Do("Set Table " & pageDrivenQueryTables(i) & " ReadOnly UserMap off UserBrowse Off UserClose Off UserEdit Off UserRemoveMap Off UserDisplayMap Off ")
             Next
 
 
@@ -994,10 +1267,10 @@ Namespace MapInfoDataDrivenPages
                 writer.WriteElementString("MEPOLYBUFFER", NumericUpDown2.Value)
                 writer.WriteElementString("MESCALEROUND", NumericUpDown3.Value)
 
-                writer.WriteElementString("MEDDPCOL", ComboBox9.Text)
+                writer.WriteElementString("MEDDPCOL", ComboBox9.Text) 'ddp scle column
 
                 writer.WriteElementString("OVERVIEWMAPPER", ComboBox10.Text)
-                writer.WriteElementString("OVERVIEWCOLOUR", CD.Color.ToArgb)
+                writer.WriteElementString("OVERVIEWCOLOUR", ColorTranslator.ToHtml(CD.Color))
                 writer.WriteElementString("OVERVIEWWIDTH", NumericUpDown5.Value)
 
                 'write page text xml
@@ -1052,7 +1325,7 @@ Namespace MapInfoDataDrivenPages
 
             InteropServices.MapInfoApplication.Do("Fetch first From " & LayoutN)
             While InteropServices.MapInfoApplication.Eval("EOT(" & LayoutN & ")") = "F"
-                    'is it a dynamic row ?  
+                'is it a dynamic row ?  
                 If isDynamicRow(InteropServices.MapInfoApplication.Eval(LayoutN & ".rowid")) <> -1 Then
                     pageTextPackedRowIdList.Add(validRowCount)
                     pageTextPackedColumnHeaderList.Add(pageTextColumnHeaderList(isDynamicRow(InteropServices.MapInfoApplication.Eval(LayoutN & ".rowid"))))
@@ -1146,6 +1419,76 @@ Namespace MapInfoDataDrivenPages
         Private Sub Button10_Click(sender As Object, e As EventArgs) Handles Button10.Click
             CD.ShowDialog()
             Panel1.BackColor = CD.Color
+        End Sub
+
+
+        Private Sub Button3_Click(sender As Object, e As EventArgs) Handles Button3.Click
+            printPages()
+        End Sub
+
+        Sub printPages()
+            exportType = 2
+            cycleThroughFeatures()
+        End Sub
+
+        Private Sub CheckBox1_CheckedChanged(sender As Object, e As EventArgs) Handles CheckBox1.CheckedChanged
+            If CheckBox1.Checked Then
+                ComboBox7.SelectedIndex = 2
+            End If
+        End Sub
+
+        Private Sub Button12_Click(sender As Object, e As EventArgs) Handles Button12.Click
+            pageSelectAll()
+        End Sub
+
+        Sub pageSelectAll()
+            For i As Integer = 0 To CheckedListBox1.Items.Count - 1
+                CheckedListBox1.SetItemChecked(i, True)
+            Next
+        End Sub
+
+        Private Sub Button13_Click(sender As Object, e As EventArgs) Handles Button13.Click
+            For i As Integer = 0 To CheckedListBox1.Items.Count - 1
+                CheckedListBox1.SetItemChecked(i, False)
+            Next
+        End Sub
+
+        Private Sub ComboBox8_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ComboBox8.SelectedIndexChanged
+
+        End Sub
+
+        Private Sub ToolStripComboBox1_Click(sender As Object, e As EventArgs) Handles ToolStripComboBox1.Click
+
+        End Sub
+
+        Function areColumnValuesUnique(ByVal colName As String) As Boolean
+            Dim tablename As String = ComboBox1.Text
+            Dim allValues As New List(Of String)
+
+            Dim i As Integer = 0
+            Dim tempValue As String = ""
+            InteropServices.MapInfoApplication.Do("Fetch First From " & tableName)
+            While InteropServices.MapInfoApplication.Eval("EOT(" & tableName & ")") = "F"
+                allValues.Add(InteropServices.MapInfoApplication.Eval(tablename & "." & colName))
+                i = i + 1
+                InteropServices.MapInfoApplication.Do("Fetch Next From " & tableName)
+            End While
+
+            Dim uniqueVals As Long = allValues.Distinct.LongCount
+            If uniqueVals = i Then
+                Return True
+            Else
+                Return False
+            End If
+
+        End Function
+
+        Private Sub Button5_Click(sender As Object, e As EventArgs) Handles Button5.Click
+            Dim OFD As New FolderBrowserDialog
+            OFD.ShowDialog()
+
+            TextBox1.Text = OFD.SelectedPath
+
         End Sub
     End Class
 End Namespace
