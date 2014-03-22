@@ -182,6 +182,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\DDPHelp.chm" />
     <None Include="Resources\MapInfow_100.ico" />
   </ItemGroup>
   <ItemGroup>

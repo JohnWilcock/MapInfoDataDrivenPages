@@ -103,6 +103,9 @@ Namespace MapInfoDataDrivenPages
         Dim windowColour As Color
         Dim validRows As Integer
 
+        'sort list - uses custom class
+        Dim sortList As New List(Of pageSortData)
+
 
 
 
@@ -234,7 +237,11 @@ Namespace MapInfoDataDrivenPages
         End Sub
 
         Private Sub Button4_Click(sender As Object, e As EventArgs) Handles Button4.Click
-            refreshDDP()
+            Dim result As Integer = MessageBox.Show("This will remove all settings and refresh the list of layers, mappers and layouts", "Continue ?", MessageBoxButtons.YesNo)
+            If result = DialogResult.Yes Then
+                refreshDDP()
+            End If
+
         End Sub
 
         Sub refreshDDP()
@@ -293,6 +300,9 @@ Namespace MapInfoDataDrivenPages
                 ComboBox2.SelectedIndex = 0
                 ComboBox2.Enabled = False
             End If
+
+            'lear sorting
+            sortList.Clear()
         End Sub
 
         Sub resetSetupFields()
@@ -408,14 +418,15 @@ Namespace MapInfoDataDrivenPages
             'add list of columns to page text 
             'TODO: - also add object information posibilities e.g area, length, scale
 
-
+            Dim y As Integer = 0
             ToolStripDropDownButton1.DropDownItems.Clear()
             For x As Integer = 0 To ColumnList.Count - 1
                 ToolStripDropDownButton1.DropDownItems.Add(ColumnList(x))
                 'ToolStripDropDownButton1.DropDownItems(x).
                 AddHandler ToolStripDropDownButton1.DropDownItems(x).Click, AddressOf addPageText
-
+                y = x
             Next
+
 
 
         End Sub
@@ -687,6 +698,15 @@ Namespace MapInfoDataDrivenPages
 
             InteropServices.MapInfoApplication.Do("Fetch First From " & tableName)
             While InteropServices.MapInfoApplication.Eval("EOT(" & tableName & ")") = "F"
+
+                'override "Next page" if sort field is chosen
+                If sortList.Count > 0 Then
+                    If i > sortList.Count Then
+                        Exit While
+                    End If
+                    InteropServices.MapInfoApplication.Do("Fetch rec " & sortList(CInt(ToolStripComboBox1.Text) - 1).number & " From " & tableName)
+                End If
+
                 'check if valid object (not all rows may have an object attached to them
                 'If tempValue = 1 Or tempValue = 2 Or tempValue = 3 Or tempValue = 4 Or tempValue = 5 Or tempValue = 6 Or tempValue = 7 Or tempValue = 8 Or tempValue = 9 Then
 
@@ -759,7 +779,11 @@ Namespace MapInfoDataDrivenPages
                     i = i + 1
                 End If
 
-                InteropServices.MapInfoApplication.Do("Fetch Next From " & tableName)
+                'only fetch next if no sort field
+                If sortList.Count = 0 Then
+                    InteropServices.MapInfoApplication.Do("Fetch Next From " & tableName)
+                End If
+
             End While
 
             If exportType = 3 Then
@@ -804,6 +828,11 @@ Namespace MapInfoDataDrivenPages
             Dim ZoomOrScale As Double
             Dim frameWidth As Double = 0
             Dim frameScale As Double = 0
+
+            'override "Next page" if sort field is chosen
+            If sortList.Count > 0 Then
+                InteropServices.MapInfoApplication.Do("Fetch rec " & sortList(CInt(ToolStripComboBox1.Text) - 1).number & " From " & tableName)
+            End If
 
             'move page number on 
             InteropServices.MapInfoApplication.Do("currentObject = MBR(" & tableName & ".obj)")
@@ -934,7 +963,10 @@ Namespace MapInfoDataDrivenPages
 
 
         Private Sub ToolStripDropDownButton1_Click(sender As Object, e As EventArgs) Handles ToolStripDropDownButton1.Click
-
+            If ComboBox2.Enabled = False Then
+                MsgBox("Layout window must be defined before page driven text can be added")
+                Exit Sub
+            End If
         End Sub
 
 
@@ -995,6 +1027,10 @@ Namespace MapInfoDataDrivenPages
 
                 'fetch correct record from index table
                 InteropServices.MapInfoApplication.Do("Fetch Rec " & ToolStripComboBox1.Text & " From " & ComboBox1.Text)
+                'override "Next page" if sort field is chosen
+                If sortList.Count > 0 Then
+                    InteropServices.MapInfoApplication.Do("Fetch rec " & sortList(CInt(ToolStripComboBox1.Text) - 1).number & " From " & ComboBox1.Text)
+                End If
 
                 InteropServices.MapInfoApplication.Do("newValueTemp = " & ComboBox1.Text & "." & pageTextColumnHeaderList(i))
 
@@ -1097,6 +1133,10 @@ Namespace MapInfoDataDrivenPages
         Sub updatePageTextToSelectedNumber()
             If ToolStripComboBox1.Text <> "" And ComboBox2.Text <> "" Then
                 InteropServices.MapInfoApplication.Do("Fetch Rec " & ToolStripComboBox1.Text & " From " & ComboBox1.Text)
+                'override "Next page" if sort field is chosen
+                If sortList.Count > 0 Then
+                    InteropServices.MapInfoApplication.Do("Fetch rec " & sortList(CInt(ToolStripComboBox1.Text) - 1).number & " From " & ComboBox1.Text)
+                End If
 
                 'get selected index table
                 Dim tableName As String = ComboBox1.Text
@@ -1117,6 +1157,10 @@ Namespace MapInfoDataDrivenPages
 
         Private Sub ToolStripButton6_Click(sender As Object, e As EventArgs) Handles ToolStripButton6.Click
             'move 1 page on
+            If ComboBox8.Enabled = False Or ComboBox2.Enabled = False Then
+                MsgBox("Both mapper and layout window must be defined before pages can be selected")
+                Exit Sub
+            End If
             If ToolStripComboBox1.Items.Count - 1 > ToolStripComboBox1.SelectedIndex Then
                 ToolStripComboBox1.SelectedIndex = ToolStripComboBox1.SelectedIndex + 1
             End If
@@ -1124,6 +1168,10 @@ Namespace MapInfoDataDrivenPages
 
         Private Sub ToolStripButton5_Click(sender As Object, e As EventArgs) Handles ToolStripButton5.Click
             'move 1 page back
+            If ComboBox8.Enabled = False Or ComboBox2.Enabled = False Then
+                MsgBox("Both mapper and layout window must be defined before pages can be selected")
+                Exit Sub
+            End If
             If ToolStripComboBox1.SelectedIndex > 0 Then
                 ToolStripComboBox1.SelectedIndex = ToolStripComboBox1.SelectedIndex - 1
             End If
@@ -1131,11 +1179,19 @@ Namespace MapInfoDataDrivenPages
 
         Private Sub ToolStripButton7_Click(sender As Object, e As EventArgs) Handles ToolStripButton7.Click
             'last page
+            If ComboBox8.Enabled = False Or ComboBox2.Enabled = False Then
+                MsgBox("Both mapper and layout window must be defined before pages can be selected")
+                Exit Sub
+            End If
             ToolStripComboBox1.SelectedIndex = ToolStripComboBox1.Items.Count - 1
         End Sub
 
         Private Sub ToolStripButton4_Click(sender As Object, e As EventArgs) Handles ToolStripButton4.Click
             'first page
+            If ComboBox8.Enabled = False Or ComboBox2.Enabled = False Then
+                MsgBox("Both mapper and layout window must be defined before pages can be selected")
+                Exit Sub
+            End If
             ToolStripComboBox1.SelectedIndex = 0
         End Sub
 
@@ -1174,6 +1230,14 @@ Namespace MapInfoDataDrivenPages
                 InteropServices.MapInfoApplication.Do("Set Table " & pageDrivenQueryTables(i) & " ReadOnly UserMap off UserBrowse Off UserClose Off UserEdit Off UserRemoveMap Off UserDisplayMap Off ")
             Next
 
+            'update the chosen mapper window in the setup tab - so saving produces the correct name
+            Dim MapperIDExisting As String = MapperIDList(ComboBox8.SelectedIndex)
+            ComboBox8.Items.Clear()
+            populateListOfMappers()
+            ComboBox8.Items.AddRange(MapperList.ToArray)
+            ComboBox8.SelectedIndex = getMapperIndex(MapperIDExisting)
+
+
 
 
 
@@ -1183,6 +1247,7 @@ Namespace MapInfoDataDrivenPages
             'cycle through random number table and remove each query from mapper
             For i As Integer = 0 To pageDrivenQueryList.Count - 1
                 InteropServices.MapInfoApplication.Do("Remove Map Window " & MapperIDList(ComboBox8.SelectedIndex) & " Layer _" & pageDrivenQueryTables(i))
+                InteropServices.MapInfoApplication.Do("close table _" & pageDrivenQueryTables(i))
             Next
             'clear query lists
             pageDrivenQueryTables.Clear()
@@ -1205,6 +1270,17 @@ Namespace MapInfoDataDrivenPages
             Next
         End Sub
 
+        'function to return new mapper name after page driven query has been added - this may be identical if window helper has overridden the window name
+        Function getMapperIndex(ByVal mapperID As String) As Integer
+            For i As Integer = 0 To MapperIDList.Count - 1
+                If MapperIDList(i) = mapperID Then
+                    getMapperIndex = i
+                End If
+            Next
+
+
+        End Function
+
         Private Sub DataGridView1_CellContentClick(sender As Object, e As DataGridViewCellEventArgs) Handles DataGridView1.CellContentClick
             pageDrivenQueryForms(DataGridView1.CurrentCellAddress.Y).caller = DataGridView1.CurrentCellAddress.Y
             pageDrivenQueryForms(DataGridView1.CurrentCellAddress.Y).ShowDialog()
@@ -1226,6 +1302,8 @@ Namespace MapInfoDataDrivenPages
         End Sub
 
         Private Sub ToolStripButton1_Click(sender As Object, e As EventArgs) Handles ToolStripButton1.Click
+
+
             'save
             ' Create XmlWriterSettings.
             Dim settings As XmlWriterSettings = New XmlWriterSettings()
@@ -1254,7 +1332,9 @@ Namespace MapInfoDataDrivenPages
 
                 'write basic info
                 writer.WriteElementString("INDEXLAYER", ComboBox1.Text)
-                writer.WriteElementString("INDEXMAPPER", ComboBox8.Text)
+                writer.WriteElementString("INDEXMAPPER", ComboBox8.Text) '-NO!
+                'index mapper may have data driven queries added to it - hmmmm.
+                'solution - update chosen mapper after every page driven query
                 writer.WriteElementString("INDEXLAYOUT", ComboBox2.Text)
                 writer.WriteElementString("INDEXNAME", ComboBox3.Text)
                 writer.WriteElementString("INDEXSORT", ComboBox4.Text)
@@ -1457,9 +1537,6 @@ Namespace MapInfoDataDrivenPages
 
         End Sub
 
-        Private Sub ToolStripComboBox1_Click(sender As Object, e As EventArgs) Handles ToolStripComboBox1.Click
-
-        End Sub
 
         Function areColumnValuesUnique(ByVal colName As String) As Boolean
             Dim tablename As String = ComboBox1.Text
@@ -1490,5 +1567,77 @@ Namespace MapInfoDataDrivenPages
             TextBox1.Text = OFD.SelectedPath
 
         End Sub
+
+        Private Sub ComboBox4_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ComboBox4.SelectedIndexChanged
+            setSortOrder()
+        End Sub
+
+        Sub setSortOrder()
+            Dim sortField As String = ComboBox4.Text
+            Dim tableName As String = ComboBox1.Text
+            Dim row As Integer = 1
+
+
+            sortList.Clear()
+            Dim currentSortItem As pageSortData
+
+            'get the sort field values for each row and put in new pageSortData class, then add to list
+            InteropServices.MapInfoApplication.Do("Fetch first From " & tableName)
+            While InteropServices.MapInfoApplication.Eval("EOT(" & tableName & ")") = "F"
+                ' 
+                currentSortItem = New pageSortData
+                currentSortItem.number = row
+                currentSortItem.sortField = InteropServices.MapInfoApplication.Eval(tableName & "." & sortField)
+
+                sortList.Add(currentSortItem)
+
+                InteropServices.MapInfoApplication.Do("Fetch next From " & tableName)
+                row = row + 1
+            End While
+
+            'sort based on sortfield
+            sortList = sortList.OrderBy(Function(x) x.sortField).ToList
+
+            'For x As Integer = 0 To sortList.Count - 1
+            'MsgBox(sortList(x).number & ", " & sortList(x).sortField)
+            'Next
+
+        End Sub
+
+    End Class
+
+
+
+
+
+
+
+
+
+
+
+
+    Public Class pageSortData
+        Private _number As String
+        Public Property number() As String
+            Get
+                Return _number
+            End Get
+            Set(ByVal value As String)
+                _number = value
+            End Set
+        End Property
+
+        Private _sortField As String
+        Public Property sortField() As String
+            Get
+                Return _sortField
+            End Get
+            Set(ByVal value As String)
+                _sortField = value
+            End Set
+        End Property
+
+
     End Class
 End Namespace

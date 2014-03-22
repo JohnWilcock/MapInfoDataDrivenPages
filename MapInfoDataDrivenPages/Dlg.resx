@@ -370,13 +370,13 @@
     <value>18, 196</value>
   </data>
   <data name="Label3.Size" type="System.Drawing.Size, System.Drawing">
-    <value>60, 13</value>
+    <value>108, 13</value>
   </data>
   <data name="Label3.TabIndex" type="System.Int32, mscorlib">
     <value>5</value>
   </data>
   <data name="Label3.Text" xml:space="preserve">
-    <value>Name Field</value>
+    <value>Name Field (Optional)</value>
   </data>
   <data name="&gt;&gt;Label3.Name" xml:space="preserve">
     <value>Label3</value>
@@ -499,7 +499,7 @@
     <value>3, 3, 3, 3</value>
   </data>
   <data name="TabPage1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>302, 453</value>
+    <value>305, 453</value>
   </data>
   <data name="TabPage1.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
@@ -1051,7 +1051,7 @@
     <value>3, 3, 3, 3</value>
   </data>
   <data name="TabPage2.Size" type="System.Drawing.Size, System.Drawing">
-    <value>302, 453</value>
+    <value>305, 453</value>
   </data>
   <data name="TabPage2.TabIndex" type="System.Int32, mscorlib">
     <value>1</value>
@@ -1251,7 +1251,7 @@ at this time</value>
     <value>3, 3, 3, 3</value>
   </data>
   <data name="TabPage4.Size" type="System.Drawing.Size, System.Drawing">
-    <value>302, 453</value>
+    <value>305, 453</value>
   </data>
   <data name="TabPage4.TabIndex" type="System.Int32, mscorlib">
     <value>3</value>
@@ -1789,7 +1789,7 @@ existing page setup</value>
     <value>3, 3, 3, 3</value>
   </data>
   <data name="TabPage3.Size" type="System.Drawing.Size, System.Drawing">
-    <value>302, 453</value>
+    <value>305, 453</value>
   </data>
   <data name="TabPage3.TabIndex" type="System.Int32, mscorlib">
     <value>2</value>
@@ -1816,7 +1816,7 @@ existing page setup</value>
     <value>0, 0</value>
   </data>
   <data name="TabControl1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>310, 479</value>
+    <value>313, 479</value>
   </data>
   <data name="TabControl1.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
@@ -1834,7 +1834,7 @@ existing page setup</value>
     <value>0</value>
   </data>
   <data name="ToolStripContainer1.ContentPanel.Size" type="System.Drawing.Size, System.Drawing">
-    <value>310, 479</value>
+    <value>313, 479</value>
   </data>
   <data name="&gt;&gt;ToolStripContainer1.ContentPanel.Name" xml:space="preserve">
     <value>ToolStripContainer1.ContentPanel</value>
@@ -1879,7 +1879,7 @@ existing page setup</value>
     <value>2</value>
   </data>
   <data name="ToolStripContainer1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>310, 504</value>
+    <value>313, 504</value>
   </data>
   <data name="ToolStripContainer1.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
@@ -2050,7 +2050,7 @@ existing page setup</value>
     <value>6, 13</value>
   </data>
   <data name="$this.Size" type="System.Drawing.Size, System.Drawing">
-    <value>310, 504</value>
+    <value>313, 504</value>
   </data>
   <data name="&gt;&gt;Column1.Name" xml:space="preserve">
     <value>Column1</value>
