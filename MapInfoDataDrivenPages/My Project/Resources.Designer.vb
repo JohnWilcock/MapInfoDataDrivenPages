@@ -91,6 +91,16 @@ Namespace My.Resources
         End Property
         
         '''<summary>
+        '''  Looks up a localized resource of type System.Byte[].
+        '''</summary>
+        Friend ReadOnly Property DDPHelp() As Byte()
+            Get
+                Dim obj As Object = ResourceManager.GetObject("DDPHelp", resourceCulture)
+                Return CType(obj,Byte())
+            End Get
+        End Property
+        
+        '''<summary>
         '''  Looks up a localized string similar to Front window is not a mapper..
         '''</summary>
         Friend ReadOnly Property ERR_FRONT_WIN_NOT_MAPPER() As String
