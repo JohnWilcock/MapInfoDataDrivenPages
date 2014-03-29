@@ -118,8 +118,8 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="MapInfow_100" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\MapInfow_100.ico;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="pdf3" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\pdf3.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="STR_VERSION" xml:space="preserve">
     <value>Version {0}</value>
@@ -151,23 +151,35 @@
   <data name="STR_DEF_FOLDER_NAME" xml:space="preserve">
     <value>New Folder</value>
   </data>
+  <data name="pdf8" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\pdf8.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="STR_MB_MNU_SUBTITLE" xml:space="preserve">
     <value>&amp;MapInfoDataDrivenPages</value>
   </data>
   <data name="ERR_MB_DLG_NOT_DISPLAYED" xml:space="preserve">
     <value>Unable to display the dialog.</value>
   </data>
+  <data name="pdf2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\pdf2.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="ERR_FRONT_WIN_NOT_MAPPER" xml:space="preserve">
     <value>Front window is not a mapper.</value>
   </data>
-  <data name="GotoLastRow_288" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\GotoLastRow_288.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="MapInfow_100" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\MapInfow_100.ico;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="STR_MB_MNU_PROFILETOOL" xml:space="preserve">
     <value>&amp;MapInfoDataDrivenPages</value>
   </data>
+  <data name="pdf5" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\pdf5.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="STR_TOOLTIP_VIEW" xml:space="preserve">
     <value>Center = ({0}, {1}) - Zoom = {2} {3}</value>
+  </data>
+  <data name="GotoLastRow_288" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\GotoLastRow_288.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="ERR_INVALID_XML" xml:space="preserve">
     <value>Invalid XML</value>
@@ -181,8 +193,20 @@
   <data name="Save_6530" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Save_6530.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="112_RefreshArrow_Green_16x16_72" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\112_RefreshArrow_Green_16x16_72.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="pdf6" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\pdf6.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="STR_ABT_DESC2" xml:space="preserve">
     <value>-</value>
+  </data>
+  <data name="pdf4" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\pdf4.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="pdf1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\pdf1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="STR_MB_APP_DESC" xml:space="preserve">
     <value>MapInfoDataDrivenPages</value>
@@ -199,11 +223,14 @@
   <data name="GotoFirstRow_287" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\GotoFirstRow_287.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="pdf7" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\pdf7.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="STR_MB_MNU_ABOUT" xml:space="preserve">
     <value>&amp;About MapInfoDataDrivenPages...</value>
   </data>
-  <data name="112_RefreshArrow_Green_16x16_72" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\112_RefreshArrow_Green_16x16_72.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="NavigateBackwards_6270" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\NavigateBackwards_6270.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="DDPHelp" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\DDPHelp.chm;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>

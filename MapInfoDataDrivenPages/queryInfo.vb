@@ -8,7 +8,21 @@ Public Class queryInfo
     Public tablename As String
 
     Private Sub queryInfo_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        'disable textbox
+        TextBox1.Enabled = False
 
+        'only add handlers if first load
+        If caller = 9999 Then
+            'add event handlers to operators drop down
+            For i As Integer = 0 To ToolStripDropDownButton1.DropDownItems.Count - 1
+                AddHandler ToolStripDropDownButton1.DropDownItems(i).Click, AddressOf addQOperator
+            Next
+        End If
+    End Sub
+
+    Sub addQOperator(ByVal sender As System.Object, ByVal e As System.EventArgs)
+        Dim theOperator As String = CType(sender, ToolStripMenuItem).Text
+        TextBox1.Text = TextBox1.Text & " " & theOperator & " "
     End Sub
 
 
@@ -33,6 +47,8 @@ Public Class queryInfo
             AddHandler ToolStripButton1.DropDownItems(x).Click, AddressOf addQPageText
 
         Next
+
+
     End Sub
 
     Sub addQLayerText(ByVal sender As System.Object, ByVal e As System.EventArgs)
@@ -57,6 +73,7 @@ Public Class queryInfo
             selColumnList.Add(InteropServices.MapInfoApplication.Eval("columninfo(" & tableName & ", COL" & i & ", 1)"))
 
         Next
+        selColumnList.Add("obj")
 
     End Sub
 
@@ -76,8 +93,21 @@ Public Class queryInfo
             MapInfoDataDrivenPages.InteropHelper.theDlg.pageDrivenQueryForms.Add(Me)
             Me.Hide()
         Else ' if an existing query called by a click
+            MapInfoDataDrivenPages.InteropHelper.theDlg.DataGridView1.Rows.Item(caller).Cells(1).Value = ComboBox1.Text
             MapInfoDataDrivenPages.InteropHelper.theDlg.pageDrivenQueryList(caller) = TextBox1.Text
             Me.Hide()
         End If
+    End Sub
+
+
+
+
+    Private Sub LinkLabel1_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles LinkLabel1.LinkClicked
+        TextBox1.Enabled = True
+
+    End Sub
+
+    Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
+        Me.Hide()
     End Sub
 End Class

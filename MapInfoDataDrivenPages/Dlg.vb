@@ -1,6 +1,6 @@
 '/*****************************************************************************
-'*       Author JWilcock 2014
-'*      Profile Tool for native mapinfo Grids v1.0
+'*       Author J.Wilcock 2014
+'*      Data Driven Pages For Mapinfo v1.0
 '*****************************************************************************
 
 
@@ -52,6 +52,7 @@ Namespace MapInfoDataDrivenPages
         ' * smooth and we have the synchronized access to the xml file, 
         ' * the Mutexes will be used. 
         ' 
+
 
         ' Name of the mutex 
         Private sXMLFile As String = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\MapInfo\MapInfo\DDP.xml"
@@ -256,6 +257,7 @@ Namespace MapInfoDataDrivenPages
             pageList.Clear()
             ToolStripDropDownButton1.DropDownItems.Clear()
             ToolStripComboBox1.Items.Clear()
+            pageList.Clear()
             'LayoutTableRowCount = 1
             'need to wipe any existing page text
 
@@ -296,9 +298,23 @@ Namespace MapInfoDataDrivenPages
             If ComboBox2.Items.Count > 0 Then
                 ComboBox2.SelectedIndex = 0
             Else
-                ComboBox2.Items.Add("No Vaild Layouts open")
-                ComboBox2.SelectedIndex = 0
-                ComboBox2.Enabled = False
+                If ComboBox8.Text <> "No Vaild Mappers open" Then
+                    'open a new layout
+                    Dim currentCoordSys As String = InteropServices.MapInfoApplication.Eval("mapperinfo(" & MapperIDList(ComboBox8.SelectedIndex) & " ,17)")
+                    InteropServices.MapInfoApplication.Do("Layout")
+                    InteropServices.MapInfoApplication.Do("Set CoordSys Layout Units " & Chr(34) & "in" & Chr(34) & "")
+                    InteropServices.MapInfoApplication.Do("Create Frame (0.5,0.5) (5,5) Pen (1,2,0) Brush (2,16777215,16777215) From Window " & MapperIDList(ComboBox8.SelectedIndex) & " FillFrame On")
+                    InteropServices.MapInfoApplication.Do("Set " & currentCoordSys)
+
+                    populateListOfLayouts()
+                    ComboBox2.Items.AddRange(LayoutList.ToArray)
+                    ComboBox2.SelectedIndex = 0
+
+                Else
+                    ComboBox2.Items.Add("No Vaild Layouts open")
+                    ComboBox2.SelectedIndex = 0
+                    ComboBox2.Enabled = False
+                End If
             End If
 
             'lear sorting
@@ -427,9 +443,51 @@ Namespace MapInfoDataDrivenPages
                 y = x
             Next
 
+            'add standard items. scale, page number & date
+            ToolStripDropDownButton1.DropDownItems.Add("-")
+            ToolStripDropDownButton1.DropDownItems.Add("Scale")
+            AddHandler ToolStripDropDownButton1.DropDownItems(y + 2).Click, AddressOf addStandardPageText
 
+            ToolStripDropDownButton1.DropDownItems.Add("Page")
+            AddHandler ToolStripDropDownButton1.DropDownItems(y + 3).Click, AddressOf addStandardPageText
+
+            ToolStripDropDownButton1.DropDownItems.Add("Date")
+            AddHandler ToolStripDropDownButton1.DropDownItems(y + 4).Click, AddressOf addStandardPageText
 
         End Sub
+
+        Sub addStandardPageText(ByVal sender As System.Object, ByVal e As System.EventArgs)
+            'standard items are those which change between pages but are not associated with attribute data. i.e. date printed.
+            Dim textType As String = CType(sender, ToolStripMenuItem).Text
+            Dim tempString As String = returnStandardText("DDP$" & textType)
+
+            'get the next layout row id
+            Dim layoutID As String = LayoutIDList(ComboBox2.SelectedIndex)
+            Dim LayoutN As String = InteropServices.MapInfoApplication.Eval("WindowInfo(" & layoutID & ", 10 )")
+            Dim currentLayoutRow As Integer = getNextLayoutRow(LayoutN)
+
+            'create a text element in selected layout with the contents set to the above
+            InteropServices.MapInfoApplication.Do("Set CoordSys Layout Units " & Chr(34) & "mm" & Chr(34))
+
+            InteropServices.MapInfoApplication.Do("Create Text into Window " & layoutID & " " & tempString & " ( 10, 10 ) ( 20, 10 ) ")
+
+            'add to varibles
+            pageTextRowIdList.Add(InteropServices.MapInfoApplication.Eval("tableInfo(" & LayoutN & ", 8 )"))
+            pageTextColumnHeaderList.Add("DDP$" & textType)
+        End Sub
+
+        Function returnStandardText(ByVal textType As String) As String
+            Dim tempstring As String = ""
+            Select Case textType
+                Case "DDP$Scale"
+                    tempstring = Chr(34) & Math.Floor(getScale()) & Chr(34)
+                Case "DDP$Page"
+                    tempstring = Chr(34) & ToolStripComboBox1.Text & Chr(34)
+                Case "DDP$Date"
+                    tempstring = Chr(34) & Date.Now.ToShortDateString & Chr(34)
+            End Select
+            Return tempstring
+        End Function
 
         Sub addPageText(ByVal sender As System.Object, ByVal e As System.EventArgs)
             'find out the text of the item clicked (this will be the column name) 
@@ -459,6 +517,24 @@ Namespace MapInfoDataDrivenPages
             'check for xml file and add it.
 
         End Sub
+
+        Function getScale()
+            'get  units of MAP
+            Dim Units As String = InteropServices.MapInfoApplication.Eval("MapperInfo(" & MapperIDList(ComboBox8.SelectedIndex) & ", 11)")
+
+            getMapperFrameInLayout(LayoutIDList(ComboBox2.SelectedIndex), MapperIDList(ComboBox8.SelectedIndex))
+            InteropServices.MapInfoApplication.Do("Set CoordSys Layout Units " & Chr(34) & Units & Chr(34))
+            Dim frameWidth As Double = InteropServices.MapInfoApplication.Eval("objectgeography(mainFrame,3) - objectgeography(mainFrame,1)")
+
+            'set coord system back - based on mapper window. 
+            InteropServices.MapInfoApplication.Do("Dim coord As String")
+            InteropServices.MapInfoApplication.Do("coord = " & Chr(34) & "Set " & Chr(34) & " + mapperinfo(" & MapperIDList(ComboBox8.SelectedIndex) & ", 17)")
+            InteropServices.MapInfoApplication.Do("Run Command coord")
+
+            'assuming metres map units and mm layout units
+            Return Math.Floor(Math.Round(CDbl((CDbl(InteropServices.MapInfoApplication.Eval("mapperinfo(" & MapperIDList(ComboBox8.SelectedIndex) & ",1)")) / frameWidth) * 1000) / NumericUpDown3.Value, 0)) * NumericUpDown3.Value
+
+        End Function
 
         Sub getColumnsOfChosenTable(ByVal tableName As String)
             ColumnList.Clear()
@@ -566,6 +642,9 @@ Namespace MapInfoDataDrivenPages
             'TODO:see above
 
             If ComboBox1.Text <> "No Vaild Index Layers open" Then
+                ToolStripComboBox1.Items.Clear()
+                pageList.Clear()
+
                 populateListofColumnsFromLayer(ComboBox1.Text)
                 resetColumnSetupFields()
                 setupRecordNumbers(ComboBox1.Text)
@@ -737,12 +816,12 @@ Namespace MapInfoDataDrivenPages
                         Case 1
                             'export chosen layout to image
                             exportJPG(layoutID, Path.Combine(TextBox1.Text, InteropServices.MapInfoApplication.Eval(tableName & "." & nameColumn)), pageWidth, pageHeight)
-                            ProgressBar1.Value = i
+                            If i < ProgressBar1.Maximum Then ProgressBar1.Value = i
                             i = i + 1
                         Case 2
                             'send to printer
                             InteropServices.MapInfoApplication.Do("PrintWin  Window " & layoutID)
-                            ProgressBar2.Value = i
+                            If i < ProgressBar2.Maximum Then ProgressBar2.Value = i
                             i = i + 1
                         Case 3
                             'multipage tif
@@ -764,7 +843,7 @@ Namespace MapInfoDataDrivenPages
                             'delete original
                             'File.Delete(Path.Combine(TextBox1.Text, InteropServices.MapInfoApplication.Eval(tableName & "." & nameColumn) & ".tif"))
 
-                            ProgressBar1.Value = i
+                            If i < ProgressBar1.Maximum Then ProgressBar1.Value = i
 
                             i = i + 1
                     End Select
@@ -794,8 +873,8 @@ Namespace MapInfoDataDrivenPages
             End If
 
 
-
-
+            ProgressBar1.Value = 0
+            ProgressBar2.Value = 0
         End Sub
 
 
@@ -1025,14 +1104,21 @@ Namespace MapInfoDataDrivenPages
                 'put current text object into temp object variable
                 InteropServices.MapInfoApplication.Do("objectTemp = " & LayoutN & ".obj")
 
-                'fetch correct record from index table
-                InteropServices.MapInfoApplication.Do("Fetch Rec " & ToolStripComboBox1.Text & " From " & ComboBox1.Text)
-                'override "Next page" if sort field is chosen
-                If sortList.Count > 0 Then
-                    InteropServices.MapInfoApplication.Do("Fetch rec " & sortList(CInt(ToolStripComboBox1.Text) - 1).number & " From " & ComboBox1.Text)
-                End If
+                'if page driven text (not standard text)
+                If pageTextColumnHeaderList(i).ToString.Contains("$") = False Then
 
-                InteropServices.MapInfoApplication.Do("newValueTemp = " & ComboBox1.Text & "." & pageTextColumnHeaderList(i))
+                    'fetch correct record from index table
+                    InteropServices.MapInfoApplication.Do("Fetch Rec " & ToolStripComboBox1.Text & " From " & ComboBox1.Text)
+                    'override "Next page" if sort field is chosen
+                    If sortList.Count > 0 Then
+                        InteropServices.MapInfoApplication.Do("Fetch rec " & sortList(CInt(ToolStripComboBox1.Text) - 1).number & " From " & ComboBox1.Text)
+                    End If
+
+                    InteropServices.MapInfoApplication.Do("newValueTemp = " & ComboBox1.Text & "." & pageTextColumnHeaderList(i))
+                Else
+                    'if a standard item (i.e. scale, date etc...)
+                    InteropServices.MapInfoApplication.Do("newValueTemp = " & returnStandardText(pageTextColumnHeaderList(i)))
+                End If
 
                 'update the object with new values
                 InteropServices.MapInfoApplication.Do("alter object objectTemp info 3, newValueTemp")
@@ -1131,6 +1217,9 @@ Namespace MapInfoDataDrivenPages
         End Sub
 
         Sub updatePageTextToSelectedNumber()
+            'check layout name is still correct (only an issue for saving as DDP uses ID)
+            hasLayoutNameChanged()
+
             If ToolStripComboBox1.Text <> "" And ComboBox2.Text <> "" Then
                 InteropServices.MapInfoApplication.Do("Fetch Rec " & ToolStripComboBox1.Text & " From " & ComboBox1.Text)
                 'override "Next page" if sort field is chosen
@@ -1148,10 +1237,13 @@ Namespace MapInfoDataDrivenPages
                 InteropServices.MapInfoApplication.Do("coord = " & Chr(34) & "Set " & Chr(34) & " + mapperinfo(" & mapperID & ", 17)")
                 InteropServices.MapInfoApplication.Do("Run Command coord")
 
-                updatePageText()
+
 
                 'move extent
                 moveExtent()
+
+                'do last as map must be moved first if scale is used
+                updatePageText()
             End If
         End Sub
 
@@ -1202,7 +1294,8 @@ Namespace MapInfoDataDrivenPages
         Sub loadQueryInfo()
             Dim QI As New queryInfo
             QI.ComboBox1.Items.AddRange(tableNames.ToArray)
-
+            'remove index layer - can't query against itslf !
+            QI.ComboBox1.Items.RemoveAt(ComboBox1.SelectedIndex)
 
             'add table name to box to allow query of columns
             QI.tablename = ComboBox1.Text
@@ -1245,7 +1338,7 @@ Namespace MapInfoDataDrivenPages
 
         Sub removeQueries()
             'cycle through random number table and remove each query from mapper
-            For i As Integer = 0 To pageDrivenQueryList.Count - 1
+            For i As Integer = 0 To pageDrivenQueryTables.Count - 1
                 InteropServices.MapInfoApplication.Do("Remove Map Window " & MapperIDList(ComboBox8.SelectedIndex) & " Layer _" & pageDrivenQueryTables(i))
                 InteropServices.MapInfoApplication.Do("close table _" & pageDrivenQueryTables(i))
             Next
@@ -1261,7 +1354,12 @@ Namespace MapInfoDataDrivenPages
             For i As Integer = 0 To pageDrivenQueryList.Count - 1
                 queryTerms = pageDrivenQueryList(i).Split(" ")
                 For j As Integer = 0 To queryTerms.Length - 1
-                    If queryTerms(j).Contains(ComboBox1.Text & ".") Then
+                    If queryTerms(j).Contains(ComboBox1.Text & ".obj") Then
+                        'if an object query get obj and put it in a variable
+                        InteropServices.MapInfoApplication.Do("dim queryVar as object")
+                        InteropServices.MapInfoApplication.Do("queryVar = " & queryTerms(j))
+                        pageDrivenQueryListSub.Add(pageDrivenQueryList(i).Replace(queryTerms(j), " queryVar "))
+                    ElseIf queryTerms(j).Contains(ComboBox1.Text & ".") Then
                         pageDrivenQueryListSub.Add(pageDrivenQueryList(i).Replace(queryTerms(j), Chr(34) & InteropServices.MapInfoApplication.Eval(queryTerms(j)) & Chr(34)))
                     End If
 
@@ -1288,7 +1386,7 @@ Namespace MapInfoDataDrivenPages
         End Sub
 
         Private Sub Button8_Click(sender As Object, e As EventArgs) Handles Button8.Click
-            pageDrivenQueryList.RemoveAt(pageDrivenQueryForms(DataGridView1.CurrentCellAddress.Y).caller)
+            pageDrivenQueryList.RemoveAt(DataGridView1.CurrentCellAddress.Y)
             pageDrivenQueryForms.RemoveAt(DataGridView1.CurrentCellAddress.Y)
             DataGridView1.Rows.RemoveAt(DataGridView1.CurrentCellAddress.Y)
         End Sub
@@ -1334,7 +1432,7 @@ Namespace MapInfoDataDrivenPages
                 writer.WriteElementString("INDEXLAYER", ComboBox1.Text)
                 writer.WriteElementString("INDEXMAPPER", ComboBox8.Text) '-NO!
                 'index mapper may have data driven queries added to it - hmmmm.
-                'solution - update chosen mapper after every page driven query
+                'solution - update chosen mapper after every page driven query - see executequeries
                 writer.WriteElementString("INDEXLAYOUT", ComboBox2.Text)
                 writer.WriteElementString("INDEXNAME", ComboBox3.Text)
                 writer.WriteElementString("INDEXSORT", ComboBox4.Text)
@@ -1380,6 +1478,9 @@ Namespace MapInfoDataDrivenPages
             Dim fileToSave As New System.IO.StreamWriter(FSA.FileName)
             fileToSave.WriteLine(xmlstring.ToString)
             fileToSave.Close()
+
+            'write workspace - this will force pack the layoutN table to bring it in line with the DDP Xml
+            InteropServices.MapInfoApplication.Do("Save Workspace As " & Chr(34) & FSA.FileName.Substring(0, FSA.FileName.Length - 3) & "wor" & Chr(34))
 
         End Sub
 
@@ -1604,6 +1705,60 @@ Namespace MapInfoDataDrivenPages
 
         End Sub
 
+        Private Sub LinkLabel1_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles LinkLabel1.LinkClicked
+            Dim pdf As New PDFHelp
+            pdf.Show()
+        End Sub
+
+        Private Sub Button14_Click(sender As Object, e As EventArgs) Handles Button14.Click
+            pageDrivenQueryForms(DataGridView1.CurrentCellAddress.Y).caller = DataGridView1.CurrentCellAddress.Y
+            pageDrivenQueryForms(DataGridView1.CurrentCellAddress.Y).ShowDialog()
+        End Sub
+
+
+        Sub hasLayoutNameChanged()
+            If ComboBox2.SelectedItem <> "" Then
+                Dim layoutID As Integer = LayoutIDList(ComboBox2.SelectedIndex)
+                'this sub determines if the layout name (title) has changed.... if it has it will update combobox2.
+                'layout names change if the user changes the window title (i.e. PHBs' Window helper) or if another layout of the same name is added. i.e 'layout' becomes layout:2
+
+                'get layout name from list (layoutname when DDp were created)
+                Dim theLayoutName As String = LayoutList(ComboBox2.SelectedIndex)
+
+                'get layout name from ID (in layoutIDList) - i.e. the layout name now
+                Dim theNEWLayoutName As String = InteropServices.MapInfoApplication.Eval("WindowInfo(" & layoutID & ", 1)")
+
+                'if layout has been closed
+                If IsNothing(theNEWLayoutName) Then
+                    Dim currentIndexLayer As String = ComboBox1.Text
+                    refreshDDP()
+                    ComboBox1.Text = currentIndexLayer
+                    Exit Sub
+                End If
+
+                'if different update combobox.
+                If theLayoutName <> theNEWLayoutName Then
+                    ComboBox2.Items.Item(ComboBox2.SelectedIndex) = theNEWLayoutName
+                End If
+            End If
+        End Sub
+
+        'validate data driven scale
+        Sub validateScaleColumn()
+            InteropServices.MapInfoApplication.Do("Fetch first From " & ComboBox1.Text)
+            While InteropServices.MapInfoApplication.Eval("EOT(" & ComboBox1.Text & ")") = "F"
+                If IsNumeric(InteropServices.MapInfoApplication.Eval(ComboBox1.Text & "." & ComboBox9.Text)) = False Then
+                    MsgBox("Non numeric or invalid scales detected in column:" & ComboBox9.Text & vbNewLine & "Errors may occur if you choose to use this field as a scale source")
+                    Exit Sub
+                End If
+                InteropServices.MapInfoApplication.Do("Fetch next From " & ComboBox1.Text)
+            End While
+        End Sub
+
+
+        Private Sub ComboBox9_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ComboBox9.SelectedIndexChanged
+            validateScaleColumn()
+        End Sub
     End Class
 
 

@@ -33,7 +33,6 @@ Namespace MapInfoDataDrivenPages
             Me.GroupBox2 = New System.Windows.Forms.GroupBox()
             Me.ComboBox8 = New System.Windows.Forms.ComboBox()
             Me.Label11 = New System.Windows.Forms.Label()
-            Me.Button4 = New System.Windows.Forms.Button()
             Me.Label10 = New System.Windows.Forms.Label()
             Me.Button1 = New System.Windows.Forms.Button()
             Me.Label4 = New System.Windows.Forms.Label()
@@ -44,6 +43,7 @@ Namespace MapInfoDataDrivenPages
             Me.ComboBox3 = New System.Windows.Forms.ComboBox()
             Me.Label1 = New System.Windows.Forms.Label()
             Me.Label2 = New System.Windows.Forms.Label()
+            Me.Button4 = New System.Windows.Forms.Button()
             Me.TabPage2 = New System.Windows.Forms.TabPage()
             Me.GroupBox7 = New System.Windows.Forms.GroupBox()
             Me.Panel1 = New System.Windows.Forms.Panel()
@@ -70,12 +70,14 @@ Namespace MapInfoDataDrivenPages
             Me.Label15 = New System.Windows.Forms.Label()
             Me.Button11 = New System.Windows.Forms.Button()
             Me.GroupBox6 = New System.Windows.Forms.GroupBox()
+            Me.Button14 = New System.Windows.Forms.Button()
             Me.Button8 = New System.Windows.Forms.Button()
             Me.Button7 = New System.Windows.Forms.Button()
             Me.DataGridView1 = New System.Windows.Forms.DataGridView()
             Me.Column1 = New System.Windows.Forms.DataGridViewTextBoxColumn()
             Me.Column2 = New System.Windows.Forms.DataGridViewTextBoxColumn()
             Me.TabPage3 = New System.Windows.Forms.TabPage()
+            Me.LinkLabel1 = New System.Windows.Forms.LinkLabel()
             Me.GroupBox8 = New System.Windows.Forms.GroupBox()
             Me.Button13 = New System.Windows.Forms.Button()
             Me.Button12 = New System.Windows.Forms.Button()
@@ -164,6 +166,7 @@ Namespace MapInfoDataDrivenPages
             '
             resources.ApplyResources(Me.TabPage1, "TabPage1")
             Me.TabPage1.Controls.Add(Me.GroupBox2)
+            Me.TabPage1.Controls.Add(Me.Button4)
             Me.TabPage1.Name = "TabPage1"
             Me.TabPage1.UseVisualStyleBackColor = True
             '
@@ -171,7 +174,6 @@ Namespace MapInfoDataDrivenPages
             '
             Me.GroupBox2.Controls.Add(Me.ComboBox8)
             Me.GroupBox2.Controls.Add(Me.Label11)
-            Me.GroupBox2.Controls.Add(Me.Button4)
             Me.GroupBox2.Controls.Add(Me.Label10)
             Me.GroupBox2.Controls.Add(Me.Button1)
             Me.GroupBox2.Controls.Add(Me.Label4)
@@ -197,13 +199,6 @@ Namespace MapInfoDataDrivenPages
             '
             resources.ApplyResources(Me.Label11, "Label11")
             Me.Label11.Name = "Label11"
-            '
-            'Button4
-            '
-            Me.Button4.Image = Global.My.Resources.Resources._112_RefreshArrow_Green_16x16_72
-            resources.ApplyResources(Me.Button4, "Button4")
-            Me.Button4.Name = "Button4"
-            Me.Button4.UseVisualStyleBackColor = True
             '
             'Label10
             '
@@ -264,6 +259,13 @@ Namespace MapInfoDataDrivenPages
             '
             resources.ApplyResources(Me.Label2, "Label2")
             Me.Label2.Name = "Label2"
+            '
+            'Button4
+            '
+            Me.Button4.Image = Global.My.Resources.Resources._112_RefreshArrow_Green_16x16_72
+            resources.ApplyResources(Me.Button4, "Button4")
+            Me.Button4.Name = "Button4"
+            Me.Button4.UseVisualStyleBackColor = True
             '
             'TabPage2
             '
@@ -451,12 +453,19 @@ Namespace MapInfoDataDrivenPages
             '
             'GroupBox6
             '
+            Me.GroupBox6.Controls.Add(Me.Button14)
             Me.GroupBox6.Controls.Add(Me.Button8)
             Me.GroupBox6.Controls.Add(Me.Button7)
             Me.GroupBox6.Controls.Add(Me.DataGridView1)
             resources.ApplyResources(Me.GroupBox6, "GroupBox6")
             Me.GroupBox6.Name = "GroupBox6"
             Me.GroupBox6.TabStop = False
+            '
+            'Button14
+            '
+            resources.ApplyResources(Me.Button14, "Button14")
+            Me.Button14.Name = "Button14"
+            Me.Button14.UseVisualStyleBackColor = True
             '
             'Button8
             '
@@ -496,11 +505,18 @@ Namespace MapInfoDataDrivenPages
             'TabPage3
             '
             resources.ApplyResources(Me.TabPage3, "TabPage3")
+            Me.TabPage3.Controls.Add(Me.LinkLabel1)
             Me.TabPage3.Controls.Add(Me.GroupBox8)
             Me.TabPage3.Controls.Add(Me.GroupBox5)
             Me.TabPage3.Controls.Add(Me.GroupBox4)
             Me.TabPage3.Name = "TabPage3"
             Me.TabPage3.UseVisualStyleBackColor = True
+            '
+            'LinkLabel1
+            '
+            resources.ApplyResources(Me.LinkLabel1, "LinkLabel1")
+            Me.LinkLabel1.Name = "LinkLabel1"
+            Me.LinkLabel1.TabStop = True
             '
             'GroupBox8
             '
@@ -715,8 +731,9 @@ Namespace MapInfoDataDrivenPages
             '
             resources.ApplyResources(Me, "$this")
             Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
+            Me.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
             Me.Controls.Add(Me.ToolStripContainer1)
-            Me.MinimumSize = New System.Drawing.Size(310, 300)
+            Me.MinimumSize = New System.Drawing.Size(320, 300)
             Me.Name = "Dlg"
             Me.ToolStripContainer1.ContentPanel.ResumeLayout(False)
             Me.ToolStripContainer1.TopToolStripPanel.ResumeLayout(False)
@@ -743,6 +760,7 @@ Namespace MapInfoDataDrivenPages
             Me.GroupBox6.ResumeLayout(False)
             CType(Me.DataGridView1, System.ComponentModel.ISupportInitialize).EndInit()
             Me.TabPage3.ResumeLayout(False)
+            Me.TabPage3.PerformLayout()
             Me.GroupBox8.ResumeLayout(False)
             Me.GroupBox5.ResumeLayout(False)
             Me.GroupBox5.PerformLayout()
@@ -835,6 +853,8 @@ Namespace MapInfoDataDrivenPages
         Friend WithEvents Button12 As System.Windows.Forms.Button
         Friend WithEvents CheckedListBox1 As System.Windows.Forms.CheckedListBox
         Friend WithEvents Label15 As System.Windows.Forms.Label
+        Friend WithEvents LinkLabel1 As System.Windows.Forms.LinkLabel
+        Friend WithEvents Button14 As System.Windows.Forms.Button
 
 #End Region
 
