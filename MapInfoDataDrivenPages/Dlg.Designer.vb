@@ -110,6 +110,7 @@ Namespace MapInfoDataDrivenPages
             Me.ToolStripButton7 = New System.Windows.Forms.ToolStripButton()
             Me.ToolStripSeparator2 = New System.Windows.Forms.ToolStripSeparator()
             Me.ToolStripDropDownButton1 = New System.Windows.Forms.ToolStripDropDownButton()
+            Me.Label16 = New System.Windows.Forms.Label()
             Me.ToolStripContainer1.ContentPanel.SuspendLayout()
             Me.ToolStripContainer1.TopToolStripPanel.SuspendLayout()
             Me.ToolStripContainer1.SuspendLayout()
@@ -362,6 +363,7 @@ Namespace MapInfoDataDrivenPages
             '
             'GroupBox3
             '
+            Me.GroupBox3.Controls.Add(Me.Label16)
             Me.GroupBox3.Controls.Add(Me.NumericUpDown2)
             Me.GroupBox3.Controls.Add(Me.ComboBox6)
             Me.GroupBox3.Controls.Add(Me.NumericUpDown1)
@@ -674,7 +676,7 @@ Namespace MapInfoDataDrivenPages
             'ToolStripButton3
             '
             Me.ToolStripButton3.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image
-            Me.ToolStripButton3.Image = Global.My.Resources.Resources._3_three_columns_9714
+            Me.ToolStripButton3.Image = Global.My.Resources.Resources._3threecolumns_9714
             resources.ApplyResources(Me.ToolStripButton3, "ToolStripButton3")
             Me.ToolStripButton3.Name = "ToolStripButton3"
             '
@@ -693,7 +695,7 @@ Namespace MapInfoDataDrivenPages
             'ToolStripButton5
             '
             Me.ToolStripButton5.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image
-            Me.ToolStripButton5.Image = Global.My.Resources.Resources.GotoNextRow_289___Copy
+            Me.ToolStripButton5.Image = Global.My.Resources.Resources.GotoNextRow_289Copy
             resources.ApplyResources(Me.ToolStripButton5, "ToolStripButton5")
             Me.ToolStripButton5.Name = "ToolStripButton5"
             '
@@ -726,6 +728,11 @@ Namespace MapInfoDataDrivenPages
             resources.ApplyResources(Me.ToolStripDropDownButton1, "ToolStripDropDownButton1")
             Me.ToolStripDropDownButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text
             Me.ToolStripDropDownButton1.Name = "ToolStripDropDownButton1"
+            '
+            'Label16
+            '
+            resources.ApplyResources(Me.Label16, "Label16")
+            Me.Label16.Name = "Label16"
             '
             'Dlg
             '
@@ -855,6 +862,7 @@ Namespace MapInfoDataDrivenPages
         Friend WithEvents Label15 As System.Windows.Forms.Label
         Friend WithEvents LinkLabel1 As System.Windows.Forms.LinkLabel
         Friend WithEvents Button14 As System.Windows.Forms.Button
+        Friend WithEvents Label16 As System.Windows.Forms.Label
 
 #End Region
 

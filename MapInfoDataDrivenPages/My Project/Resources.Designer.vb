@@ -65,7 +65,7 @@ Namespace My.Resources
         '''</summary>
         Friend ReadOnly Property _112_RefreshArrow_Green_16x16_72() As System.Drawing.Bitmap
             Get
-                Dim obj As Object = ResourceManager.GetObject("112_RefreshArrow_Green_16x16_72", resourceCulture)
+                Dim obj As Object = ResourceManager.GetObject("_112_RefreshArrow_Green_16x16_72", resourceCulture)
                 Return CType(obj,System.Drawing.Bitmap)
             End Get
         End Property
@@ -73,9 +73,9 @@ Namespace My.Resources
         '''<summary>
         '''  Looks up a localized resource of type System.Drawing.Bitmap.
         '''</summary>
-        Friend ReadOnly Property _3_three_columns_9714() As System.Drawing.Bitmap
+        Friend ReadOnly Property _3threecolumns_9714() As System.Drawing.Bitmap
             Get
-                Dim obj As Object = ResourceManager.GetObject("3(three)columns_9714", resourceCulture)
+                Dim obj As Object = ResourceManager.GetObject("_3threecolumns_9714", resourceCulture)
                 Return CType(obj,System.Drawing.Bitmap)
             End Get
         End Property
@@ -160,9 +160,9 @@ Namespace My.Resources
         '''<summary>
         '''  Looks up a localized resource of type System.Drawing.Bitmap.
         '''</summary>
-        Friend ReadOnly Property GotoNextRow_289___Copy() As System.Drawing.Bitmap
+        Friend ReadOnly Property GotoNextRow_289Copy() As System.Drawing.Bitmap
             Get
-                Dim obj As Object = ResourceManager.GetObject("GotoNextRow_289 - Copy", resourceCulture)
+                Dim obj As Object = ResourceManager.GetObject("GotoNextRow_289Copy", resourceCulture)
                 Return CType(obj,System.Drawing.Bitmap)
             End Get
         End Property

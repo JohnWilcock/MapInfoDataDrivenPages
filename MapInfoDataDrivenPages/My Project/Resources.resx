@@ -145,7 +145,7 @@
   <data name="STR_MB_APP_FILENAME" xml:space="preserve">
     <value>MapInfoDataDrivenPages.MBX</value>
   </data>
-  <data name="3(three)columns_9714" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="_3threecolumns_9714" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\3(three)columns_9714.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="STR_DEF_FOLDER_NAME" xml:space="preserve">
@@ -184,7 +184,7 @@
   <data name="ERR_INVALID_XML" xml:space="preserve">
     <value>Invalid XML</value>
   </data>
-  <data name="GotoNextRow_289 - Copy" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="GotoNextRow_289Copy" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\GotoNextRow_289 - Copy.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="STR_MB_MNU_EXIT" xml:space="preserve">
@@ -193,7 +193,7 @@
   <data name="Save_6530" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Save_6530.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="112_RefreshArrow_Green_16x16_72" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="_112_RefreshArrow_Green_16x16_72" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\112_RefreshArrow_Green_16x16_72.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="pdf6" type="System.Resources.ResXFileRef, System.Windows.Forms">

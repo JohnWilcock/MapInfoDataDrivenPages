@@ -10,7 +10,7 @@ Public Class PackTable
 
 
         InteropServices.MapInfoApplication.Do("Commit Table " & MapInfoDataDrivenPages.InteropHelper.theDlg.ComboBox1.Text)
-        InteropServices.MapInfoApplication.Do("print " & Chr(34) & "Commit Table " & MapInfoDataDrivenPages.InteropHelper.theDlg.ComboBox1.Text & Chr(34))
+        'InteropServices.MapInfoApplication.Do("print " & Chr(34) & "Commit Table " & MapInfoDataDrivenPages.InteropHelper.theDlg.ComboBox1.Text & Chr(34))
         InteropServices.MapInfoApplication.Do("Pack Table " & Label4.Text & " Graphic Data ")
         Me.Hide()
         'MapInfoDataDrivenPages.InteropHelper.theDlg.refreshDDP()

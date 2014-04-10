@@ -107,6 +107,9 @@ Namespace MapInfoDataDrivenPages
         'sort list - uses custom class
         Dim sortList As New List(Of pageSortData)
 
+        'delete list
+        Dim deleteList As New List(Of String)
+
 
 
 
@@ -692,16 +695,14 @@ Namespace MapInfoDataDrivenPages
             ep.Param(0) = New EncoderParameter(encoder, CLng(EncoderValue.MultiFrame))
 
 
-
+            deleteList.Clear()
             'set up MI dim for MBR object (.net cannot accept this
             InteropServices.MapInfoApplication.Do("dim currentObject as object")
 
-            'set first page
-            ToolStripComboBox1.SelectedIndex = 0
 
             'get selected index table
             Dim tableName As String = ComboBox1.Text
-            Dim mapperID As Integer = MapperIDList(ComboBox1.SelectedIndex)
+            Dim mapperID As Integer = MapperIDList(ComboBox8.SelectedIndex)
             'get selected layout name
             Dim layoutName As String = ComboBox2.Text
             Dim layoutID As Integer = LayoutIDList(ComboBox2.SelectedIndex)
@@ -723,6 +724,7 @@ Namespace MapInfoDataDrivenPages
             'windowinfo page orientaion =22
             'PrinterSettings.PaperSizes rawkind
 
+            Dim outName As String
             Dim MapInfoPageSize As Integer = InteropServices.MapInfoApplication.Eval("windowinfo(" & layoutID & ", 24)")
             Dim layoutPageSize As New PaperSize
             'layoutPageSize.RawKind = MapInfoPageSize
@@ -788,14 +790,17 @@ Namespace MapInfoDataDrivenPages
 
                 'check if valid object (not all rows may have an object attached to them
                 'If tempValue = 1 Or tempValue = 2 Or tempValue = 3 Or tempValue = 4 Or tempValue = 5 Or tempValue = 6 Or tempValue = 7 Or tempValue = 8 Or tempValue = 9 Then
-
+                If i = CheckedListBox1.Items.Count + 1 Then Exit While
                 If CheckedListBox1.GetItemChecked(i - 1) Then
+                    'recNumber = InteropServices.MapInfoApplication.Eval(tableName & ".rowid")
 
                     'move page number on 
                     'this will trigger pagetext update
-                    If ToolStripComboBox1.SelectedIndex + 1 <> ToolStripComboBox1.Items.Count And i > 1 Then
-                        ToolStripComboBox1.SelectedIndex = i - 1 'ToolStripComboBox1.SelectedIndex + 1
-                    End If
+                    ToolStripComboBox1.SelectedIndex = i - 1 'ToolStripComboBox1.SelectedIndex + 1
+
+
+                    'InteropServices.MapInfoApplication.Do("Fetch rec " & recNumber & " From " & tableName)
+
 
                     'NOW MOVED TO MOVE EXTENT''''''''''''''''''''''''''''''
                     'execute any page driven queries
@@ -811,26 +816,25 @@ Namespace MapInfoDataDrivenPages
 
                     'requires re-seting after updatePageText
                     'InteropServices.MapInfoApplication.Do("Fetch Rec " & i & " From " & tableName)
-
+                    ' MsgBox(InteropServices.MapInfoApplication.Eval(tableName & ".rowid"))
                     Select Case exportType
                         Case 1
                             'export chosen layout to image
+                            'MsgBox(nameColumn & ": " & InteropServices.MapInfoApplication.Eval(tableName & "." & nameColumn))
                             exportJPG(layoutID, Path.Combine(TextBox1.Text, InteropServices.MapInfoApplication.Eval(tableName & "." & nameColumn)), pageWidth, pageHeight)
                             If i < ProgressBar1.Maximum Then ProgressBar1.Value = i
-                            i = i + 1
                         Case 2
                             'send to printer
                             InteropServices.MapInfoApplication.Do("PrintWin  Window " & layoutID)
                             If i < ProgressBar2.Maximum Then ProgressBar2.Value = i
-                            i = i + 1
                         Case 3
                             'multipage tif
-                            exportJPG(layoutID, Path.Combine(TextBox1.Text, InteropServices.MapInfoApplication.Eval(tableName & "." & nameColumn)), pageWidth, pageHeight)
-
+                            outName = InteropServices.MapInfoApplication.Eval(tableName & "." & nameColumn)
+                            exportJPG(layoutID, Path.Combine(TextBox1.Text, outName), pageWidth, pageHeight)
                             'if first image
                             If IsNothing(MasterBitmap) Then
                                 'master image
-                                MasterBitmap = Bitmap.FromFile(Path.Combine(TextBox1.Text, InteropServices.MapInfoApplication.Eval(tableName & "." & nameColumn) & ".tif"))
+                                MasterBitmap = Bitmap.FromFile(Path.Combine(TextBox1.Text, outName) & ".tif")
                                 MasterBitmap.Save(Path.Combine(TextBox1.Text, "multiPageTiff.tif"), info, ep)
                                 ep.Param(0) = New EncoderParameter(encoder, CLng(EncoderValue.FrameDimensionPage))
                             Else
@@ -839,26 +843,19 @@ Namespace MapInfoDataDrivenPages
                                 MasterBitmap.SaveAdd(currentImage, ep)
 
                             End If
-
-                            'delete original
-                            'File.Delete(Path.Combine(TextBox1.Text, InteropServices.MapInfoApplication.Eval(tableName & "." & nameColumn) & ".tif"))
+                            deleteList.Add(Path.Combine(TextBox1.Text, InteropServices.MapInfoApplication.Eval(tableName & "." & nameColumn) & ".tif"))
 
                             If i < ProgressBar1.Maximum Then ProgressBar1.Value = i
-
-                            i = i + 1
                     End Select
 
-                    'NOW MOVED TO MOVE EXTENT'''''''''''''''''''''''''''''
-                    'remove queries after export
-                    ' If pageDrivenQueryList.Count > 0 Then
-                    'removeQueries()
-                    'End If
-                    ''''''''''''''''''''''''''''''''''''''''''''''''''''''
-                Else
-                    i = i + 1
+
                 End If
+                i = i + 1
+
+
 
                 'only fetch next if no sort field
+                'InteropServices.MapInfoApplication.Do("Fetch rec " & recNumber & " From " & tableName)
                 If sortList.Count = 0 Then
                     InteropServices.MapInfoApplication.Do("Fetch Next From " & tableName)
                 End If
@@ -872,12 +869,23 @@ Namespace MapInfoDataDrivenPages
                 MasterBitmap.SaveAdd(ep)
             End If
 
-
             ProgressBar1.Value = 0
             ProgressBar2.Value = 0
         End Sub
 
+        'still can't use ... can't detach bmps from process
+        Sub cleanUpTiffs()
+            If deleteList.Count > 0 Then
+                For Each fPath As String In deleteList
+                    'delete original
+                    If File.Exists(fPath) Then
+                        File.Delete(fPath)
+                    End If
+                Next
 
+                deleteList.Clear()
+            End If
+        End Sub
 
         Sub moveExtent()
             'remove queries 
@@ -1006,7 +1014,8 @@ Namespace MapInfoDataDrivenPages
 
         Sub exportJPG(ByVal theLayoutNum As Integer, ByVal outName As String, ByVal pageX As Double, ByVal pageY As Double)
             'units ? ... set to mm ???
-
+            Dim recNumber As String
+            recNumber = InteropServices.MapInfoApplication.Eval(ComboBox1.Text & ".rowid")
             outName = outName & "." & ComboBox7.Text
 
             Dim outputType As String = "JPEG"
@@ -1020,7 +1029,7 @@ Namespace MapInfoDataDrivenPages
 
             'function to create map jpg
             InteropServices.MapInfoApplication.Do("Save Window windowID(" & theLayoutNum & ") As " & Chr(34) & outName & Chr(34) & " Type " & Chr(34) & outputType & Chr(34) & " Width " & pageX & "  Units " & Chr(34) & "mm" & Chr(34) & " Height " & pageY & "  Units " & Chr(34) & "mm" & Chr(34) & " Resolution " & NumericUpDown4.Value)
-
+            InteropServices.MapInfoApplication.Do("Fetch rec " & recNumber & " From " & ComboBox1.Text)
         End Sub
 
         Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
@@ -1036,7 +1045,7 @@ Namespace MapInfoDataDrivenPages
         End Sub
 
         Private Sub ToolStripButton2_Click(sender As Object, e As EventArgs) Handles ToolStripButton2.Click
-            refreshDDP()
+
             loadXML()
         End Sub
 
@@ -1155,6 +1164,35 @@ Namespace MapInfoDataDrivenPages
             OFD.Title = "Pick a saved Data driven pages file"
             OFD.ShowDialog()
 
+            If OFD.FileName = "" Then Exit Sub
+
+            'does wor exist
+            If File.Exists(OFD.FileName.Substring(0, OFD.FileName.Length - 3) & "wor") Then
+                'workspace file exists - check dates of both
+                Dim ddpINFO As Date = IO.File.GetLastWriteTime(OFD.FileName)
+                Dim worINFO As Date = IO.File.GetLastWriteTime(OFD.FileName.Substring(0, OFD.FileName.Length - 3) & "wor")
+                'are dates within a min of each other (i.e. has the wor been altered since saving)
+                If (ddpINFO - worINFO).TotalSeconds > 5 Or (ddpINFO - worINFO).TotalSeconds < 5 Then
+                    'warn user
+                    Dim result As Integer = MessageBox.Show("Workspace has been altered since saving Data Driven Pages, loading may result in errors", "Continue ?", MessageBoxButtons.YesNo)
+                    If result <> DialogResult.Yes Then Exit Sub
+                End If
+
+                'open wor
+                'close all currently open files
+                InteropServices.MapInfoApplication.Do("Close All")
+
+                'open worspace
+                InteropServices.MapInfoApplication.Do("Run Application " & Chr(34) & OFD.FileName.Substring(0, OFD.FileName.Length - 3) & "wor" & Chr(34))
+
+            Else
+                'only settings file exists
+                Dim openResult As Integer = MessageBox.Show("No corrisponding workspace file found. An attempt can be made to match Data Driven Page settings to currently loaded files, errors may occur", "Continue ?", MessageBoxButtons.YesNo)
+                If openResult <> DialogResult.Yes Then Exit Sub
+            End If
+
+            refreshDDP()
+
             'load xml
             Dim DDP As XDocument = XDocument.Load(OFD.FileName)
             'Dim DDP As XDocument = theFile...<DDP>
@@ -1213,6 +1251,11 @@ Namespace MapInfoDataDrivenPages
 
 
         Private Sub ToolStripComboBox1_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ToolStripComboBox1.SelectedIndexChanged
+            If ComboBox2.Text <> "" And ComboBox2.Text <> "No Vaild Layouts open" Then
+                If areSettingsValid() = False Then
+                    Exit Sub
+                End If
+            End If
             updatePageTextToSelectedNumber()
         End Sub
 
@@ -1249,6 +1292,10 @@ Namespace MapInfoDataDrivenPages
 
         Private Sub ToolStripButton6_Click(sender As Object, e As EventArgs) Handles ToolStripButton6.Click
             'move 1 page on
+            If areSettingsValid() = False Then
+                Exit Sub
+            End If
+
             If ComboBox8.Enabled = False Or ComboBox2.Enabled = False Then
                 MsgBox("Both mapper and layout window must be defined before pages can be selected")
                 Exit Sub
@@ -1260,6 +1307,10 @@ Namespace MapInfoDataDrivenPages
 
         Private Sub ToolStripButton5_Click(sender As Object, e As EventArgs) Handles ToolStripButton5.Click
             'move 1 page back
+            If areSettingsValid() = False Then
+                Exit Sub
+            End If
+
             If ComboBox8.Enabled = False Or ComboBox2.Enabled = False Then
                 MsgBox("Both mapper and layout window must be defined before pages can be selected")
                 Exit Sub
@@ -1271,6 +1322,9 @@ Namespace MapInfoDataDrivenPages
 
         Private Sub ToolStripButton7_Click(sender As Object, e As EventArgs) Handles ToolStripButton7.Click
             'last page
+            If areSettingsValid() = False Then
+                Exit Sub
+            End If
             If ComboBox8.Enabled = False Or ComboBox2.Enabled = False Then
                 MsgBox("Both mapper and layout window must be defined before pages can be selected")
                 Exit Sub
@@ -1280,6 +1334,9 @@ Namespace MapInfoDataDrivenPages
 
         Private Sub ToolStripButton4_Click(sender As Object, e As EventArgs) Handles ToolStripButton4.Click
             'first page
+            If areSettingsValid() = False Then
+                Exit Sub
+            End If
             If ComboBox8.Enabled = False Or ComboBox2.Enabled = False Then
                 MsgBox("Both mapper and layout window must be defined before pages can be selected")
                 Exit Sub
@@ -1386,6 +1443,7 @@ Namespace MapInfoDataDrivenPages
         End Sub
 
         Private Sub Button8_Click(sender As Object, e As EventArgs) Handles Button8.Click
+
             pageDrivenQueryList.RemoveAt(DataGridView1.CurrentCellAddress.Y)
             pageDrivenQueryForms.RemoveAt(DataGridView1.CurrentCellAddress.Y)
             DataGridView1.Rows.RemoveAt(DataGridView1.CurrentCellAddress.Y)
@@ -1400,6 +1458,8 @@ Namespace MapInfoDataDrivenPages
         End Sub
 
         Private Sub ToolStripButton1_Click(sender As Object, e As EventArgs) Handles ToolStripButton1.Click
+            'kill queries first - because if they are object queries they will be based on a variable
+            removeQueries()
 
 
             'save
@@ -1417,6 +1477,11 @@ Namespace MapInfoDataDrivenPages
             FSA.Filter = "DDP xml files (*.ddp)|*.DDP"
             FSA.Title = "choose a file name to save this data driven pages setup"
             FSA.ShowDialog()
+
+            'is a valid filenme
+            If FSA.FileName.Length < 3 Then
+                Exit Sub
+            End If
 
             'condense list of dynamic row ids (page text) as this table is packed on a " save workspace" removing all empty rows
             setPageTextPackedRowIdList()
@@ -1755,10 +1820,89 @@ Namespace MapInfoDataDrivenPages
             End While
         End Sub
 
-
+        'more Bl*!$y validation
         Private Sub ComboBox9_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ComboBox9.SelectedIndexChanged
             validateScaleColumn()
         End Sub
+
+        Function isIndexLayerStillOpen() As Boolean
+            'cycle through all layers
+            Dim NumberOfTablesOpen As Integer
+            'find number of open tables
+            NumberOfTablesOpen = InteropServices.MapInfoApplication.Eval("NumTables()")
+
+            'cycle through all open tables (don't need to be in mapper) to find vector layers
+            For i As Integer = 1 To NumberOfTablesOpen
+                If InteropServices.MapInfoApplication.Eval("tableinfo(" & i & ", 1)") = ComboBox1.Text Then Return True
+            Next
+
+            Return False
+        End Function
+
+        Function isMapperStillOpen() As Boolean
+            'cycle through all layers
+            Dim NumberOfWinOpen As Integer
+            'find number of open tables
+            NumberOfWinOpen = InteropServices.MapInfoApplication.Eval("NumWindows()")
+
+            'cycle through all open tables (don't need to be in mapper) to find vector layers
+            For i As Integer = 1 To NumberOfWinOpen
+                If InteropServices.MapInfoApplication.Eval("windowid(" & i & ")") = MapperIDList(ComboBox8.SelectedIndex) Then Return True
+            Next
+
+            Return False
+        End Function
+
+        Function isLayoutStillOpen() As Boolean
+            'cycle through all layers
+            Dim NumberOfWinOpen As Integer
+            'find number of open tables
+            NumberOfWinOpen = InteropServices.MapInfoApplication.Eval("NumWindows()")
+
+            'cycle through all open tables (don't need to be in mapper) to find vector layers
+            For i As Integer = 1 To NumberOfWinOpen
+                If InteropServices.MapInfoApplication.Eval("windowid(" & i & ")") = LayoutIDList(ComboBox2.SelectedIndex) Then Return True
+            Next
+
+            Return False
+        End Function
+
+        Function isOverviewStillOpen() As Boolean
+            'cycle through all layers
+            Dim NumberOfWinOpen As Integer
+            'find number of open tables
+            NumberOfWinOpen = InteropServices.MapInfoApplication.Eval("NumWindows()")
+
+            'cycle through all open tables (don't need to be in mapper) to find vector layers
+            For i As Integer = 1 To NumberOfWinOpen
+                If InteropServices.MapInfoApplication.Eval("windowinfo(" & i & ",1)") = ComboBox10.Text Then Return True
+            Next
+
+            Return False
+        End Function
+
+        Function areSettingsValid() As Boolean
+            Dim errorMSG As String = ""
+
+            If isIndexLayerStillOpen() = False Then
+                errorMSG = errorMSG & "Index Layer not found" & vbNewLine
+            End If
+
+            If isMapperStillOpen() = False Then
+                errorMSG = errorMSG & "Mapper Window not found" & vbNewLine
+            End If
+
+            If isLayoutStillOpen() = False Then
+                errorMSG = errorMSG & "Layout Window not found" & vbNewLine
+            End If
+
+            If errorMSG.Length > 0 Then
+                MsgBox("The following errors were found:" & vbNewLine & errorMSG)
+                Return False
+            End If
+
+            Return True
+        End Function
     End Class
 
 

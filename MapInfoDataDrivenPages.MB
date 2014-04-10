@@ -1,34 +1,10 @@
 '/*****************************************************************************
-'*       Author JWilcock 2014
+'*		Mapinfo data Driven Pages
+'*      Author JWilcock 2014
 '*      v1.0
 '*****************************************************************************
 
-Declare Function GE_OpenGrid lib "migrid.dll" 
-	(filein As string, byval cache as integer, hgrid as integer) As logical
 
-Declare Function GE_GetCoordSysInfo lib "migrid.dll"
-	(ByVal hgrid as integer, clau as string, mix as float, miy as float, max as float, may as float) as logical
-
-Declare Function GE_GetContinuousMinMax lib "migrid.dll"
-	(ByVal hgrid as integer, zmin as float, zmax as float) as logical
-
-Declare Function GE_GetDimensions lib "migrid.dll"
-	(ByVal hgrid as integer, wid as integer, hei as integer) as logical
-
-Declare Function GE_GetContinuousValue lib "migrid.dll"
-	(ByVal hgrid as integer,ByVal icol as integer,ByVal jrow as integer, zval as float, ax as smallint) as logical
-
-Declare Function GE_GetGridType lib "migrid.dll"
-	(ByVal hgrid as integer, gtyp as smallint) as logical
-
-Declare Function GE_StartRead lib "migrid.dll"
-	(ByVal hgrid as integer) as logical
-
-Declare Function GE_EndRead lib "migrid.dll"
-	(ByVal hgrid as integer) as logical
-	
-Declare Function GE_CloseGrid lib "migrid.dll" 
-  	(hgrid as integer) as logical
 
 
 '****************************************************************************
@@ -44,11 +20,10 @@ Include "C:\Program Files (x86)\MapInfo\MAPBASIC\auto_lib.def"
 '****************************************************************************
 ' .NET Functions
 '****************************************************************************
-Declare Method GetResItemStr Class "MapInfoDataDrivenPages.Controller" Lib "MapInfoDataDrivenPages.dll" (ByVal itemName As String) As String
 Declare Method ShowDlg Class "MapInfoDataDrivenPages.Controller" Lib "MapInfoDataDrivenPages.dll" (ByVal hwnd as Integer) As Logical
 Declare Method CloseDlg Class "MapInfoDataDrivenPages.Controller" Lib "MapInfoDataDrivenPages.dll" () As Logical
 Declare Method showAbout Class "MapInfoDataDrivenPages.Controller" Lib "MapInfoDataDrivenPages.dll" () As integer
-'Declare Method XsecLine Class "ProfileTool.Dlg" Lib "ProfileTool.dll" (ByVal ReturnString as string) As Logical
+
 
 '****************************************************************************
 ' Declare sub procedures
@@ -57,8 +32,6 @@ Declare Sub Main
 declare sub about
 Declare Sub EndHandler 
 Declare Sub loader
-Declare Sub DDP
-Declare Sub saveDDPWorkspace
 Declare Sub SelChangedHandler 
 
 
@@ -89,11 +62,7 @@ Sub Main
 	OverviewOutline = MakePen(1, 2, 16711680)
 	
   OnError Goto HandleError
-  ' Assign some global variables, so that the Auto-Load button 
-  ' (in the About dialog) can use the library routines 
-  ' stored in AUTO_LIB.MBO.  
-  gsAppFilename = GetResItemStr("STR_MB_APP_FILENAME")    ' name of MapBasic app file  
-  gsAppDescription = GetResItemStr("STR_MB_APP_DESC")      ' short description of MB application 
+
 
 'check if file exists 
 if FileExists(GetFolderPath$(-3) + "\" + "DDP.tab") then
@@ -104,7 +73,7 @@ else
 	dim regTool as integer
 	dim thePath as string  
 	thePath = ApplicationDirectory$( ) + "MapInfoDataDrivenPages.mbx"
-	'regTool = RegisterTool("ProfileTool", "Get Elevation profiles",thePath,"JWilcock",1)
+	'regTool = RegisterTool("DDP", "DDP implementation based on ArcGIS UI",thePath,"JWilcock",1)
 end if
 
 
@@ -115,7 +84,7 @@ end if
 	Create Menu "MapInfoDataDrivenPages" as
 		"Show &Tool" Calling loader,
 		"(-",
-		"&About" calling About,
+		"Help and About" calling About,
 		"E&xit" calling bye
 
   	Alter Menu "Tools" Add "MapInfoDataDrivenPages" As "MapInfoDataDrivenPages"
@@ -159,7 +128,7 @@ Sub loader
   hwndPro = SystemInfo(SYS_INFO_MAPINFOWND)
   ret = ShowDlg(hwndPro)
   If Not ret Then
-    Note GetResItemStr("ERR_MB_DLG_NOT_DISPLAYED")
+ 
   End If
   Exit Sub
   HandleError:
@@ -192,17 +161,6 @@ end sub
 
 ' ////////////////////// end 
 
-sub DDP
-
-
-
-end sub
-
-sub saveDDPWorkspace()
-	'call the .net sub (saveWORKSPACE)
-	
-End Sub
- 
 'dont need to check for deletion as table does not pack untill workspace saves 
 Sub SelChangedHandler
  	
