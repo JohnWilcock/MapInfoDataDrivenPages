@@ -57,6 +57,7 @@ Namespace MapInfoDataDrivenPages
             Me.Label7 = New System.Windows.Forms.Label()
             Me.NumericUpDown3 = New System.Windows.Forms.NumericUpDown()
             Me.GroupBox3 = New System.Windows.Forms.GroupBox()
+            Me.Label16 = New System.Windows.Forms.Label()
             Me.NumericUpDown2 = New System.Windows.Forms.NumericUpDown()
             Me.ComboBox6 = New System.Windows.Forms.ComboBox()
             Me.NumericUpDown1 = New System.Windows.Forms.NumericUpDown()
@@ -110,7 +111,6 @@ Namespace MapInfoDataDrivenPages
             Me.ToolStripButton7 = New System.Windows.Forms.ToolStripButton()
             Me.ToolStripSeparator2 = New System.Windows.Forms.ToolStripSeparator()
             Me.ToolStripDropDownButton1 = New System.Windows.Forms.ToolStripDropDownButton()
-            Me.Label16 = New System.Windows.Forms.Label()
             Me.ToolStripContainer1.ContentPanel.SuspendLayout()
             Me.ToolStripContainer1.TopToolStripPanel.SuspendLayout()
             Me.ToolStripContainer1.SuspendLayout()
@@ -373,6 +373,11 @@ Namespace MapInfoDataDrivenPages
             resources.ApplyResources(Me.GroupBox3, "GroupBox3")
             Me.GroupBox3.Name = "GroupBox3"
             Me.GroupBox3.TabStop = False
+            '
+            'Label16
+            '
+            resources.ApplyResources(Me.Label16, "Label16")
+            Me.Label16.Name = "Label16"
             '
             'NumericUpDown2
             '
@@ -728,11 +733,6 @@ Namespace MapInfoDataDrivenPages
             resources.ApplyResources(Me.ToolStripDropDownButton1, "ToolStripDropDownButton1")
             Me.ToolStripDropDownButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text
             Me.ToolStripDropDownButton1.Name = "ToolStripDropDownButton1"
-            '
-            'Label16
-            '
-            resources.ApplyResources(Me.Label16, "Label16")
-            Me.Label16.Name = "Label16"
             '
             'Dlg
             '
