@@ -9,7 +9,7 @@ Namespace MapInfoDataDrivenPages
 
 #Region "[GET APP VERSION]"
 
-        Private Const SYS_INFO_APPVERSION As Integer = 2 ' Used with SystemInfo to get appversion
+        Private Const SYS_INFO_APPVERSION As Integer = 3 ' Used with SystemInfo to get appversion .... JW altered to 3 as need version of MI running NOT version compiled (2)
 
         ''' <summary>
         ''' Gets the MapInfo Professional version number
