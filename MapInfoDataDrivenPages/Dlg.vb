@@ -864,6 +864,18 @@ Namespace MapInfoDataDrivenPages
             Dim layoutName As String = ComboBox2.Text
             Dim layoutID As Integer = LayoutIDList(ComboBox2.SelectedIndex)
 
+            'get units of projection -> (july 2015 fix) -> the map units must be set to match this otherwise a UTM coord of 6,000,000 + will zoom the map out too far in a lat/lng unit (0 to 360)
+            Dim mapperCoordSys As String = InteropServices.MapInfoApplication.Eval("MapperInfo(" & mapperID & ", 17)")
+            Dim mapperCoordSysSplit() As String = mapperCoordSys.Split(",") '3rd (2) is the units
+
+            'set map units to projection units -> (july 2015 fix) 
+            If mapperCoordSysSplit.Count > 2 Then ' only do if a unit clause exists
+                InteropServices.MapInfoApplication.Do("set map window " & mapperID & " xy units " & mapperCoordSysSplit(2))
+            Else
+                'no unit clause - will be in degrees ?? "Projections and Their Parameters" in MI help specifies units are required for all projection except lat/long, so this fudge should work ok.
+                InteropServices.MapInfoApplication.Do("set map window " & mapperID & " xy units " & Chr(34) & "degree" & Chr(34))
+            End If
+
             'get  units of MAP
             Dim Units As String = InteropServices.MapInfoApplication.Eval("MapperInfo(" & mapperID & ", 11)")
             Dim LayoutUnits As String = InteropServices.MapInfoApplication.Eval("MapperInfo(" & mapperID & ", 11)")
@@ -887,6 +899,7 @@ Namespace MapInfoDataDrivenPages
             maxX = InteropServices.MapInfoApplication.Eval("ObjectGeography(" & tableName & ".obj, 3) ")
             minY = InteropServices.MapInfoApplication.Eval("ObjectGeography(" & tableName & ".obj, 2) ")
             maxY = InteropServices.MapInfoApplication.Eval("ObjectGeography(" & tableName & ".obj, 4) ")
+
 
             If RadioButton1.Checked Then
                 'if best fit scaling
